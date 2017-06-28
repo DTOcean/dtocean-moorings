@@ -60,24 +60,24 @@ class CleanPyc(Command):
                     continue
                 yield os.path.join(root, fname)
 
-setup( name='dtocean-moorings',
-       version='1.0.0',
-       packages=find_packages(),
-       description='The moorings and foundations module for the DTOcean tools',
-       author='Sam Weller, Jon Hardwick, Mathew Topper',
-       author_email=('s.weller@exeter.ac.uk, '
-                     'J.P.Hardwick@exeter.ac.uk, '
-                     'damm_horse@yahoo.co.uk'),
-       license="GPLv3",
-       install_requires=['numpy',
-                         'polite>=0.9',
-                         'scipy' ],
+setup(name='dtocean-moorings',
+      version='1.1.dev0',
+      packages=find_packages(),
+      description='The moorings and foundations module for the DTOcean tools',
+      author='Sam Weller, Jon Hardwick, Mathew Topper',
+      author_email=('s.weller@exeter.ac.uk, '
+                    'J.P.Hardwick@exeter.ac.uk, '
+                    'damm_horse@yahoo.co.uk'),
+      license="GPLv3",
+      install_requires=['numpy',
+                        'polite>=0.9',
+                        'scipy' ],
 	   package_data={'dtocean_moorings': ['config/*.yaml']
                     },
-       zip_safe=False, # Important for reading config files
-       tests_require=['pytest'],
-       cmdclass = {'test': PyTest,
-                   'cleanpyc': CleanPyc,
-                   }
+      zip_safe=False, # Important for reading config files
+      tests_require=['pytest'],
+      cmdclass = {'test': PyTest,
+                  'cleanpyc': CleanPyc,
+                  }
       )
        

@@ -1,21 +1,25 @@
 """
 Release Version of the DTOcean: Moorings and Foundations module: 17/10/16
 Developed by: Renewable Energy Research Group, University of Exeter
+
+Mathew Topper, 2017
 """
-# Start logging
-import logging
-module_logger = logging.getLogger(__name__)
 
 # Built in modulesrad
-import os
-import csv
 import copy
-import pandas as pd
-from .core import Found, Moor, Subst
-from scipy import interpolate
-    
-this_dir = os.path.dirname(os.path.realpath(__file__))
+import logging
 
+# External modules
+import pandas as pd
+
+# Local modules
+from .foundations import Found
+from .moorings import Moor
+from .substation import Subst
+
+# Start logging
+module_logger = logging.getLogger(__name__)
+    
 
 class Variables(object):
     """
@@ -432,10 +436,10 @@ class Variables(object):
             self.maxlines = 12
         else:
             self.maxlines = abs(int(maxlines))
-        
+            
         return
         
-class Main(Found,Moor,Subst):
+class Main(Found, Moor, Subst):
     """
     #-------------------------------------------------------------------------- 
     #--------------------------------------------------------------------------
