@@ -18,7 +18,8 @@ import pandas as pd
 from scipy import interpolate, optimize
 
 # Local imports
-from .core import Moor, Loads
+from .loads import Loads
+from .moorings import Moor
 
 # Start logging
 module_logger = logging.getLogger(__name__)
@@ -872,11 +873,15 @@ class Found(Moor, Loads):
                 + self.foundloc[j][1] ** 2.0)
          
             """ X-Y seabed slope estimated from bathymetry grid points nearest 
-                to each foundation location """             
-            self.deltabathyy = (np.mean([self.gpnear[2][2],self.gpnear[3][2]])  
-                - np.mean([self.gpnear[0][2],self.gpnear[1][2]]))
-            self.deltabathyx = (np.mean([self.gpnear[1][2],self.gpnear[3][2]]) 
-                - np.mean([self.gpnear[0][2],self.gpnear[2][2]]))
+                to each foundation location """   
+            
+            # Collect local coords
+            gpnear = self.gpnear[j]
+                
+            self.deltabathyy = (np.mean([gpnear[2][2], gpnear[3][2]])  
+                                    - np.mean([gpnear[0][2], gpnear[1][2]]))
+            self.deltabathyx = (np.mean([gpnear[1][2], gpnear[2][2]]) 
+                                    - np.mean([gpnear[0][2], gpnear[3][2]]))
             self.seabedslp[j][0] = math.atan(self.deltabathyx 
                                 / self._variables.bathygriddeltax)
             self.seabedslp[j][1] = math.atan(self.deltabathyy 
