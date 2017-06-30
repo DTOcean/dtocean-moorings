@@ -1,13 +1,15 @@
 """
 Release Version of the DTOcean: Moorings and Foundations module: 17/10/16
 Developed by: Renewable Energy Research Group, University of Exeter
+
+Mathew Topper <dataonlygreater@gmail.com>, 2017
 """
 
 # Built in modulesrad
 import math
-import copy
 import logging
 import operator
+from itertools import izip
 
 # External module import
 import numpy as np
@@ -236,282 +238,115 @@ class Loads(object):
 
     """
 
-    def __init__(self, variables):        
-        self._variables = variables    
+    def __init__(self, variables):
         
-    def gpnearloc(self,deviceid,systype,foundloc,sysorig,sysorienang):          
-        """ Bathymetry grid tolerances """  
-        bathygridxtol = 0.5 * self._variables.bathygriddeltax
-        bathygridytol = 0.5 * self._variables.bathygriddeltay
-        if systype in ('wavefloat', 'tidefloat'):
-            if self.foundradnew:
-                quanfound = self.numlines                 
-                # fig = plt.figure()
-                # ax = fig.add_subplot(111, projection='3d')
-                # for j in range(0,quanfound):
-                    # ax.scatter(self.foundloc[j][0]+sysorig[0],self.foundloc[j][1]+sysorig[1],self.foundloc[j][2], c='r')  
-                # ax.scatter(self._variables.bathygrid[:,0],self._variables.bathygrid[:,1],self._variables.bathygrid[:,2])
-                # ax.view_init(azim=0, elev=90)
-                # plt.show()
-            else:
-                self.fairloc = self._variables.fairloc
-                quanfound = len(foundloc)
-        elif systype in ('wavefixed', 'tidefixed', 'substation'):
-            quanfound = len(foundloc)
-        self.quanfound = quanfound
-        if systype in ('wavefloat', 'tidefloat'): 
-            self.fairlocglob = [[0 for col in range(2)] for row 
-                                in range(0, quanfound)] 
-            for j in range(0,quanfound):
-                self.fairlocglob[j] = self.fairloc[j]             
-                   
-        self.griddist = np.array([[0 for col in range(4)] for row 
-            in range(len(self._variables.bathygrid))], dtype=float)
-        self.gpnear = [[0 for col in range(2)] for row in range(4)] 
-        self.gpnearlocs = [0 for row in range(0, quanfound + 1)]         
-        self.gpnearestinds = [0 for row in range(0, quanfound + 1)]
-        self.soiltyp = [0 for row in range(0, quanfound)] 
-        self.soildep = [0 for row in range(0, quanfound)] 
-        self.soilgroup = [0 for row in range(0, quanfound)]
+        self._variables = variables
+        self.foundradnew = None
+        self.numlines = None
+        self.quanfound = None
+        self.fairlocglob = []
+        self.fairloc = None
+        self.gpnear = []
+        self.soiltyp = []
+        self.soildep = [] 
+        self.soilgroup = []
+        self.foundlocglob = []
+        self.foundloc = None
+        self.mindevdist = None
+        self.maxdisp = None
+        self.lineangs = []
+        self.bathysysorig = None
         
-        self.foundlocglob = [[0 for col in range(3)] for row 
-                                in range(0, quanfound + 1)] 
-                                
+        return
+        
+    def gpnearloc(self, deviceid, systype, foundloc, sysorig, sysorienang):   
+
+        # Get number of foundations required
+        self.quanfound = self._get_foundation_quantity(systype, foundloc)
+        
+        # Set type specific variables
         if systype in ('wavefloat', 'tidefloat'):
-            """ Determine minimum distance between neighbouring devices """
-            devdist = [0 for row in range(0, len(self._variables.sysorig))]
-            if len(self._variables.sysorig) > 1:
-                for devposind, dev in enumerate(self._variables.sysorig):                
-                    devdist[devposind] = math.sqrt((self._variables.sysorig[dev][0] - sysorig[0]) ** 2.0 
-                        + (self._variables.sysorig[dev][1] - sysorig[1]) ** 2.0)    
-                devlistsort = sorted(devdist)
-                self.mindevdist = devlistsort[1]
-            else:   
-                self.mindevdist = 10000.0       
-            if self._variables.maxdisp is not None:
-                self.maxdisp = self._variables.maxdisp 
-                self.maxdisp[2] = self.maxdisp[2] + self._variables.sysdraft
-            else:
-                """ Set very high displacement limits if not specified by the user """
-                self.maxdisp = [1000.0, 1000.0, 1000.0]
             
+            # Fairleads
+            self._set_fairloc(self.quanfound)
+            
+            # Minimum distance between devices
+            self.mindevdist = self._get_minimum_distance(sysorig)
+            
+            # Max displacement of floating devices
+            self.maxdisp = self._get_maximum_displacement()
+            
+            # Foundation locations
             if self.foundradnew:
                 self.foundloc = foundloc
             else:
-                if len(self._variables.foundloc) > 0:                
-                    self.foundloc = self._variables.foundloc
-                elif not self._variables.foundloc and self._variables.prefootrad:
-                    for j in range(0,quanfound):              
-                        self.foundloc.append([self._variables.prefootrad 
-                            * math.sin(self.lineangs[j]), self._variables.prefootrad 
-                            * math.cos(self.lineangs[j]), 0.0])
-                    self.foundloc = np.array(self.foundloc)
-                elif not self._variables.foundloc and not self._variables.prefootrad:
-                    """ Set initial anchor radius based on mean water depth. Note the 
-                    suitability of this factor as an initial guess needs to be 
-                    determined """
-                    meanwatdep = math.fabs(sum(self._variables.bathygrid[:,2]) 
-                                    / len(self._variables.bathygrid[:,2]))
-                    for j in range(0,quanfound):           
-                        self.foundloc.append([meanwatdep * 8.0 * math.sin(
-                            self.lineangs[j]),meanwatdep * 8.0 * math.cos(
-                            self.lineangs[j]), -meanwatdep])
-                    self.foundloc = np.array(self.foundloc) 
+                self.foundloc = self._get_foundation_locations(
+                                                    self.lineangs,
+                                                    self.quanfound)
+            
         elif systype in ('wavefixed', 'tidefixed','substation'):
-            self.foundloc = np.array(foundloc)      
+            
+            self.foundloc = np.array(foundloc)
+            
+        else:
+            
+            errStr = "System type '{}' is not recognised.".format(systype)
+            raise ValueError(errStr)
         
-        for j in range(0,quanfound + 1):
-            """ Find nearest grid point(s) to foundation locations. Run through foundations and then
-            find bathymetry at system origin.
-            Transformation required from local (foundloc) to global coordinates """
-            if j < quanfound:  
-                self.foundlocglob[j] = np.array([round(self.foundloc[j][0],3),
-                                                round(self.foundloc[j][1],3), 
-                                                0.0])
-            self.gpnearind = [0, 0, 0, 0]            
-            for gpind, gp in enumerate(self._variables.bathygrid):
-                self.griddist[gpind][:3] = gp[:3]                
-                self.griddist[gpind][3] = math.sqrt(((
-                    self.foundlocglob[j][0] 
-                    + sysorig[0])
-                    -gp[0]) ** 2.0 
-                    + ((self.foundlocglob[j][1] 
-                    + sysorig[1]) 
-                    - gp[1]) ** 2.0)    
-            self.gpsort = self.griddist[np.argsort(self.griddist[:, 3])] 
-            self.gpnearind[0] = [y for y, x in enumerate(self._variables.bathygrid)
-                if math.fabs(x[0] - self.gpsort[0][0]) < bathygridxtol and math.fabs(x[1] - self.gpsort[0][1]) < bathygridytol][0]
-            self.gpnearestinds[j] = copy.deepcopy(self.gpnearind[0])
-            self.gpnear[0][0] = self.gpsort[0][0]    
-            self.gpnear[0][1] = self.gpsort[0][1]
+        foundlocglobs = []
+        gpnears = []
+        soil_types = []
+        soil_depths = []
+        soil_groups = []
+        
+        # Collect data for foundations
+        for foundloc in self.foundloc:
             
-            """ Warning if foundation location is outside of supplied grid. Note: this relies on a 
-                rectangular grid """
-            if (self.foundlocglob[j][0] + sysorig[0] > max(item[0] for item in self._variables.bathygrid)
-                or sysorig[0] - self.foundlocglob[j][0] < min(item[0] for item in self._variables.bathygrid)
-                or self.foundlocglob[j][1] + sysorig[1] > max(item[1] for item in self._variables.bathygrid)
-                or sysorig[1] - self.foundlocglob[j][1] < min(item[1] for item in self._variables.bathygrid)):  
-                module_logger.warn('!!!!!!!!!!!!!!!!! WARNING: Foundation location off bathymetry grid !!!!!!!!!!!!!!!!!')
+            # Start foundlocglob by rounding x, y values
+            foundlocglob = [round(foundloc[0], 3), round(foundloc[1], 3)]
             
-            """ If the foundation/system location happens to coincide with a grid line 
-            or grid point the nearest grid points at one grid spacing in either 
-            direction are used """
-            conincident_point = self.gpnear[0]
+            (closest_idx,
+             closest_point) = self._get_closest_grid_point(sysorig,
+                                                           foundloc)
             
-            if (self.foundlocglob[j][0] + sysorig[0]  == self.gpnear[0][0] 
-                or self.foundlocglob[j][1] + sysorig[1] == self.gpnear[0][1]):
-                    
-                module_logger.info("Foundation point coincides with grid line "
-                                   "or grid point")
-                                  
-                self.gpnear[0] = [
-                    self.gpnear[0][0] - self._variables.bathygriddeltax, 
-                    self.gpnear[0][1] - self._variables.bathygriddeltay,
-                    0.0]
-                self.gpnear[1] = [
-                    self.gpnear[0][0] + 2 * self._variables.bathygriddeltax, 
-                    self.gpnear[0][1],
-                    0.0]
-                self.gpnear[2] = [
-                    self.gpnear[0][0],
-                    self.gpnear[0][1] + 2 * self._variables.bathygriddeltay,
-                    0.0]
-                self.gpnear[3] = [
-                    self.gpnear[0][0] + 2 * self._variables.bathygriddeltax, 
-                    self.gpnear[0][1] + 2 * self._variables.bathygriddeltay,
-                    0.0]
-                
-                for k in range(0,4):
-                    
-                    # Break this down to report error
-                    gpnearinds = [y for y, x
-                                    in enumerate(self._variables.bathygrid)
-                            if math.fabs(x[0] - self.gpnear[k][0])
-                                                            < bathygridxtol
-                            and math.fabs(x[1] - self.gpnear[k][1])
-                                                            < bathygridytol]
-                                                            
-                    if not gpnearinds:
+            gpnearestinds, gpnear = self._get_neighbours(sysorig,
+                                                         closest_point,
+                                                         foundloc)
 
-                        errStr = ("Could not find suitable grid points near "
-                                  "({}, {})").format(conincident_point[0],
-                                                     conincident_point[1])
-                        raise RuntimeError(errStr)
-                                                            
-                    self.gpnearind[k] = gpnearinds[0]  
-                    self.gpnear[k][2] = copy.deepcopy(
-                            self._variables.bathygrid[self.gpnearind[k]][2])
-              
-            elif (self.foundlocglob[j][0] 
-                + sysorig[0] 
-                != self.gpnear[0][0] and self.foundlocglob[j][1] 
-                + sysorig[1] 
-                != self.gpnear[0][1]):                
-                """ Locate neighbouring grid points 2-4 """            
-                if (self.foundlocglob[j][0] 
-                    + sysorig[0] 
-                    > self.gpnear[0][0]):
-                    self.gpnearind[1] = [y for y, x in 
-                    enumerate(self._variables.bathygrid) 
-                    if (math.fabs(x[0] - (self.gpnear[0][0] 
-                    + self._variables.bathygriddeltax)) < bathygridxtol 
-                    and math.fabs(x[1] - self.gpnear[0][1]) < bathygridytol)][0]
-                elif (self.foundlocglob[j][0] 
-                    + sysorig[0] 
-                    < self.gpnear[0][0]):
-                    self.gpnearind[1] = [y for y, x in 
-                    enumerate(self._variables.bathygrid) 
-                    if (math.fabs(x[0] - (self.gpnear[0][0] 
-                    - self._variables.bathygriddeltax)) < bathygridxtol 
-                    and math.fabs(x[1] - self.gpnear[0][1]) < bathygridytol)][0]                 
-                if (self.foundlocglob[j][1] 
-                    + sysorig[1] 
-                    > self.gpnear[0][1]):
-                    self.gpnearind[2] = [y for y, x in 
-                    enumerate(self._variables.bathygrid) 
-                    if (math.fabs(x[1] - (self.gpnear[0][1] 
-                    + self._variables.bathygriddeltay)) < bathygridytol 
-                    and math.fabs(x[0] - self.gpnear[0][0]) < bathygridxtol)][0]                   
-                elif (self.foundlocglob[j][1] 
-                    + sysorig[1] 
-                    < self.gpnear[0][1]):
-                    self.gpnearind[2] = [y for y, x in 
-                    enumerate(self._variables.bathygrid)
-                    if (math.fabs(x[1] - (self.gpnear[0][1] 
-                    - self._variables.bathygriddeltay)) < bathygridytol 
-                    and math.fabs(x[0] - self.gpnear[0][0]) < bathygridxtol)][0]
-                    
-                self.gpnearind[3] = [y for y, x in enumerate(self._variables.bathygrid) 
-                    if (math.fabs(x[0] - self._variables.bathygrid[self.gpnearind[1]][0]) < bathygridxtol
-                    and math.fabs(x[1] - self._variables.bathygrid[self.gpnearind[2]][1]) < bathygridytol)][0]
-                for k in range(0,4):
-                    self.gpnear[k] = copy.deepcopy(self._variables.bathygrid[self.gpnearind[k]])
-            self.gpnearlocs[j] = self.gpnear
+            founddepth = self._get_depth(foundloc,
+                                         gpnearestinds)
             
-            """ Determine bathymetry depth at each foundation point and system origin """
-            locbathyvalues = np.transpose(np.array([self._variables.bathygrid[self.gpnearind,0],
-                                        self._variables.bathygrid[self.gpnearind,1],
-                                        self._variables.bathygrid[self.gpnearind,2]]))            
-            bathyint = interpolate.interp2d(locbathyvalues[:,0],
-                                            locbathyvalues[:,1],
-                                            locbathyvalues[:,2],
-                                            kind='linear')
-            if j < quanfound:
-                self.foundlocglob[j][2] = (bathyint(self.foundlocglob[j][0] + sysorig[0],
-                                                   self.foundlocglob[j][1] + sysorig[1])
-                                                   - self._variables.wlevmax)  
-            elif j == quanfound:                
-                self.foundlocglob[j][2] = (bathyint(sysorig[0],
-                                                   sysorig[1])
-                                                   - self._variables.wlevmax)               
-                self.bathysysorig = -self.foundlocglob[j][2][0]   
+            foundlocglob.append(founddepth)
             
-            if j < quanfound: 
-                """ Determine soil type at nearest grid point """
-                if len(self._variables.soiltypgrid[self.gpnearestinds[j]]) > 4:
-                    soillayerdep = []
-                    totsoillayerdep = 0.0
-                    """ Multiple layers exist, determine significance of top layers above bedrock """
-                    soillayerlist = list(self._variables.soiltypgrid[self.gpnearestinds[j]])
-                    soillayersind = [y for y, x in enumerate(soillayerlist) if x in ('ls', 'ms', 'ds', 'vsc', 'sc', 'fc', 'stc')
-                                     and math.isinf(float(soillayerlist[-1]))]
-                    for ind in soillayersind:
-                        soillayerdep.append((ind, soillayerlist[ind+1]))
-                        totsoillayerdep = totsoillayerdep + soillayerlist[ind+1]
-                    if totsoillayerdep <= 6.0:
-                        """ Soil layer(s) covering bedrock classed as a skim (i.e. less than 6.0m deep), 
-                            bedrock is used for subsequent foundation calculations """
-                        self.soiltyp[j] = (self._variables.soiltypgrid[
-                                            self.gpnearestinds[j]][-2])
-                        self.soildep[j] = float(self._variables.soiltypgrid[
-                                            self.gpnearestinds[j]][-1])
-                    elif totsoillayerdep > 6.0:
-                        """ For deep sediments over bedrock assume soil is homogeneous and based on the 
-                            soil type with the deepest layer """
-                        layermax = max(soillayerdep, key=operator.itemgetter(1))
-                        self.soiltyp[j] = (self._variables.soiltypgrid[
-                                            self.gpnearestinds[j]][layermax[0]])
-                        self.soildep[j] = totsoillayerdep                    
-                else:    
-                    if math.isinf(float(self._variables.soiltypgrid[self.gpnearestinds[j]][3])):
-                        """ Use first layer as it has infinite depth """
-                        self.soiltyp[j] = (self._variables.soiltypgrid[
-                                            self.gpnearestinds[j]][2])
-                        self.soildep[j] = float(self._variables.soiltypgrid[
-                                            self.gpnearestinds[j]][3])
-                    else:
-                        self.soiltyp[j] = (self._variables.soiltypgrid[
-                                        self.gpnearestinds[j]][2])
-                        self.soildep[j] = float(self._variables.soiltypgrid[
-                                        self.gpnearestinds[j]][3])
+            # Get soil data
+            soiltype, soildepth = self._get_soil_type_depth(closest_idx)
+            soilgroup = self._get_soil_group(soiltype)
                                     
-                if self.soiltyp[j] in ('ls', 'ms', 'ds'): 
-                    self.soilgroup[j] = 'cohesionless'
-                if self.soiltyp[j] in ('vsc', 'sc', 'fc', 'stc'): 
-                    self.soilgroup[j] = 'cohesive'
-                if self.soiltyp[j] in ('hgt', 'cm', 'src', 'hr', 'gc'): 
-                    self.soilgroup[j] = 'other'    
+            foundlocglobs.append(np.array(foundlocglob))
+            gpnears.append(gpnear)
+            soil_types.append(soiltype)
+            soil_depths.append(soildepth)
+            soil_groups.append(soilgroup)
             
+        # Add data for device
+        _, closest_point = self._get_closest_grid_point(sysorig)
+        gpnearestinds, gpnear = self._get_neighbours(sysorig,
+                                                     closest_point)
+        sysdepth = self._get_depth(sysorig,
+                                   gpnearestinds)
+        sysloc = np.array([sysorig[0], sysorig[1], sysdepth])
+        
+        foundlocglobs.append(sysloc)
+
+        # Update attributes
+        self.foundlocglob = foundlocglobs
+        self.gpnear = gpnears
+        self.soiltyp = soil_types
+        self.soildep = soil_depths
+        self.soilgroup = soil_groups
+        self.bathysysorig = -sysdepth
+        
+        return
         
     def sysstat(self,sysvol,sysmass):
         """ Calculate static system loads """
@@ -1071,9 +906,7 @@ class Loads(object):
             """ Determine if externally calculated WAMIT or NEMOH excitation loads have been provided
                 Note: Only one input file is used at the moment. Possibility to extend this for substations """
             if (self._variables.fex and systype in ('wavefloat','tidefloat','wavefixed','tidefixed')):
-                logmsg = [""]       
-                logmsg.append('WAMIT/NEMOH parameters provided') 
-                module_logger.info("\n".join(logmsg))
+                module_logger.info('WAMIT/NEMOH parameters provided')
                 """ Determine which wave frequencies, directions and translation modes have been analysed """
                 """ If parameters for only one device have been supplied use these for all devices """      
                 if isinstance(self._variables.fex,dict):
@@ -1258,9 +1091,7 @@ class Loads(object):
                         + self.syswaveload[tpind][2] ** 2.0)
                             
             else:
-                logmsg = [""]       
-                logmsg.append('WAMIT/NEMOH parameters not provided') 
-                module_logger.info("\n".join(logmsg))
+                module_logger.info('WAMIT/NEMOH parameters not provided')
                 fexmodes = [0, 0, 0]
             
             if fexfullset == 'True':
@@ -2101,3 +1932,346 @@ class Loads(object):
                                     self.ressyswaveload))
             self.syswaveloadmax = self.syswaveload[self.syswaveloadmaxind] 
             # module_logger.warn('self.syswaveloadsort[wcind] {}'.format(self.syswaveloadsort[wcind]))
+    
+    def _set_fairloc(self, quanfound=None):
+        
+        if quanfound is not None:
+            assert len(self._variables.fairloc) == quanfound
+        
+        if not self.foundradnew: self.fairloc = self._variables.fairloc
+        self.fairlocglob = self.fairloc[:]
+            
+        return
+
+    def _get_foundation_quantity(self, systype, foundloc):
+        
+        if not systype in ('wavefloat',
+                           'tidefloat',
+                           'wavefixed',
+                           'tidefixed',
+                           'substation'):
+            
+            errStr = "System type '{}' not ".format(systype)
+            raise ValueError(errStr)
+        
+        if self.foundradnew and systype in ('wavefloat', 'tidefloat'):
+            quanfound = self.numlines                 
+        else:
+            quanfound = len(foundloc)
+            
+        return quanfound
+    
+    def _get_minimum_distance(self, sysorig):
+        
+        # Determine minimum distance between neighbouring devices
+        devdist = []
+        
+        # Check if more than one device
+        if len(self._variables.sysorig) > 1:
+            
+            for dev in self._variables.sysorig:     
+                
+                local_orig = self._variables.sysorig[dev]
+                x_dist = local_orig[0] - sysorig[0]
+                y_dist = local_orig[1] - sysorig[1]
+                
+                dist =  math.sqrt(x_dist ** 2 + y_dist ** 2)    
+                devdist.append(dist)
+            
+            # First sorted entry will be zero as distance to self
+            devlistsort = sorted(devdist)
+            mindevdist = devlistsort[1]
+            
+        else:
+            
+            mindevdist = 10000.0
+            
+        return mindevdist
+    
+    def _get_maximum_displacement(self):
+            
+        if self._variables.maxdisp is not None:
+            maxdisp = self._variables.maxdisp[:]
+            maxdisp[2] += self._variables.sysdraft
+        else:
+            # Set very high displacement limits if not specified by the user
+            maxdisp = [1000.0, 1000.0, 1000.0]
+            
+        return maxdisp
+    
+    def _get_foundation_locations(self, lineangs,
+                                        quanfound=None,
+                                        depth_multiplier=8.0):
+            
+        if (self._variables.foundloc is not None and
+            len(self._variables.foundloc) > 0): return self._variables.foundloc
+              
+        if quanfound is not None: assert len(lineangs) == quanfound
+                                            
+        loc_list = []
+            
+        if self._variables.prefootrad:
+            
+            for angle in lineangs:
+                
+                x = self._variables.prefootrad * math.sin(angle)
+                y = self._variables.prefootrad * math.cos(angle)
+                z = 0.0
+                
+                loc_list.append([x, y, z])
+            
+        else:
+            
+            # Set initial anchor radius based on mean water depth. Note the 
+            # suitability of this factor as an initial guess needs to be 
+            # determined
+        
+            sum_depth = sum(self._variables.bathygrid[:,2])
+            n_bathy = self._variables.bathygrid.shape[0]
+            meanwatdep = math.fabs(sum_depth / n_bathy) 
+
+            for angle in lineangs:
+                
+                x = meanwatdep * depth_multiplier * math.sin(angle)
+                y = meanwatdep * depth_multiplier * math.cos(angle)
+                z = 0.0
+                
+                loc_list.append([x, y, z])
+                                                
+        foundloc = np.array(loc_list)
+        
+        return foundloc
+    
+    def _get_closest_grid_point(self, sysorig,
+                                      local_point=None):
+        
+        """ Find nearest grid point(s) to given point. Transformation
+        required from local (foundloc) to global coordinates.
+        """ 
+        
+        # Bathymetry grid tolerances
+        bathygridxtol = 0.5 * self._variables.bathygriddeltax
+        bathygridytol = 0.5 * self._variables.bathygriddeltay
+
+        griddist = []
+        xglobal = sysorig[0]
+        yglobal = sysorig[1]
+        
+        if local_point is not None:
+            xglobal += local_point[0]
+            yglobal += local_point[1]
+        
+        for i, grid_point in enumerate(self._variables.bathygrid):
+                        
+            xdist = xglobal - grid_point[0]
+            ydist = yglobal - grid_point[1]
+            point_dist = math.sqrt(xdist ** 2 + ydist ** 2)
+            
+            # Don't include points further than the grid tolerence
+            if (math.fabs(xdist) > bathygridxtol or
+                math.fabs(ydist) > bathygridytol): continue
+            
+            point_dist_list = [i] + list(grid_point) + [point_dist]
+            griddist.append(point_dist_list)
+            
+        # Error if foundation location is outside of supplied grid.
+        if not griddist:
+            errStr = ("No suitable grid points found for placing foundation "
+                      "at ({}, {})").format(xglobal, yglobal)
+            raise RuntimeError(errStr)
+        
+        griddist = np.array(griddist)
+        sorted_points = griddist[np.argsort(griddist[:, 4])]
+        closest_point = sorted_points[0]
+        
+        return int(closest_point[0]), closest_point[1:4]
+    
+    def _get_neighbours(self, sysorig,
+                              closest_point,
+                              local_point=None):
+        
+        """ If the foundation/system location happens to coincide with a grid 
+        line or grid point the nearest grid points at one grid spacing in
+        either direction are used """
+        
+        # Bathymetry grid tolerances
+        bathygridxtol = 0.5 * self._variables.bathygriddeltax
+        bathygridytol = 0.5 * self._variables.bathygriddeltay
+
+        xglobal = sysorig[0]
+        yglobal = sysorig[1]
+        
+        if local_point is not None:
+            xglobal += local_point[0]
+            yglobal += local_point[1]
+                
+        # Check for coincidence with grid
+        if (np.isclose(xglobal, closest_point[0]) or
+            np.isclose(yglobal, closest_point[1])):
+                
+            module_logger.info("Foundation point coincides with grid line "
+                               "or grid point")
+            
+            # Get diagonals from closest point
+            x0 = closest_point[0] - self._variables.bathygriddeltax
+            x1 = closest_point[0] + self._variables.bathygriddeltax
+
+            y0 = closest_point[1] - self._variables.bathygriddeltay
+            y1 = closest_point[1] + self._variables.bathygriddeltay
+          
+        else:
+            
+            # Surrounding x points
+            if xglobal > closest_point[0]:
+                x0 = closest_point[0]
+                x1 = closest_point[0] + self._variables.bathygriddeltax
+            else:
+                x0 = closest_point[0] - self._variables.bathygriddeltax
+                x1 = closest_point[0]
+              
+            # Surrounding y points
+            if yglobal > closest_point[1]:
+                y0 = closest_point[0]
+                y1 = closest_point[0] + self._variables.bathygriddeltay
+            else:
+                y0 = closest_point[0] - self._variables.bathygriddeltay
+                y1 = closest_point[0]
+                
+        gpsearch = [[x0, y0],
+                    [x1, y0],
+                    [x1, y1],
+                    [x0, y1]]
+        
+        # Collect indices of neighbours in grid
+        gpnearinds = []
+        
+        for search_point in gpsearch:
+            
+            find_inds = []
+            
+            for idx, grid_point in enumerate(self._variables.bathygrid):
+                
+                x = grid_point[0] - search_point[0]
+                y = grid_point[1] - search_point[1]
+            
+                if (math.fabs(x) < bathygridxtol and
+                    math.fabs(y) < bathygridytol):
+                    
+                    find_inds.append(idx)
+                                                    
+            if not find_inds:
+
+                errStr = ("Could not find suitable grid points near "
+                          "({}, {})").format(search_point[0],
+                                             search_point[1])
+                raise RuntimeError(errStr)
+                
+            elif len(find_inds) > 1:
+                
+                errStr = ("Multiple grid points found near "
+                          "({}, {})").format(search_point[0],
+                                             search_point[1])
+                raise RuntimeError(errStr)
+                                                    
+            gpnearinds.append(find_inds[0])
+            
+        # Collect points
+        gpnear = [self._variables.bathygrid[idx, :] for idx in gpnearinds]
+
+        return gpnearinds, gpnear
+
+    def _get_depth(self, point,
+                         gpnearinds):
+        
+        """Determine bathymetry depth at the given point.
+        """
+        
+        locbathyvalues = np.array([self._variables.bathygrid[gpnearinds, 0],
+                                   self._variables.bathygrid[gpnearinds, 1],
+                                   self._variables.bathygrid[gpnearinds, 2]]).T
+        
+        bathyint = interpolate.interp2d(locbathyvalues[:, 0],
+                                        locbathyvalues[:, 1],
+                                        locbathyvalues[:, 2],
+                                        kind='linear')
+        
+        depth = bathyint(point[0], point[1]) - self._variables.wlevmax
+                        
+        return depth
+
+    def _get_soil_type_depth(self, point_idx):
+        
+        """Determine soil type and depth at a given grid point index.
+        """
+                
+        # Check that soil table is correctly formatted
+        list_depth = [x[-1] for x in self._variables.soiltypgrid]
+        
+        if not np.isinf(list_depth).all():
+            errStr = "Final sediment layer must have infinite depth."
+            raise ValueError(errStr)
+        
+        soil_point = self._variables.soiltypgrid[point_idx]
+        
+        # Check for multiple layers
+        if len(soil_point) > 4:
+            soiltype, soildepth = self._get_soil_type_depth_multi(soil_point)
+        else:
+            soiltype = soil_point[-2]
+            soildepth = np.inf
+            
+        return soiltype, soildepth
+    
+    @classmethod
+    def _get_soil_type_depth_multi(cls, soil_point):
+        
+        soillayerdep = []
+        totsoillayerdep = 0.0
+        
+        soft_sediments = ('ls', 'ms', 'ds', 'vsc', 'sc', 'fc', 'stc')
+        
+        # Iterate through layers pairwise ignoring last layer
+        layer_iter = iter(soil_point[2:-2])
+        layer_pairs = izip(layer_iter, layer_iter)
+        
+        # Determine significance of top layers above bedrock
+        for soil_type, layer_depth in layer_pairs:
+            
+            if soil_type not in soft_sediments: continue
+
+            soillayerdep.append((soil_type, layer_depth))
+            totsoillayerdep = totsoillayerdep + layer_depth
+            
+        if totsoillayerdep <= 6.0:
+            
+            # Soil layer(s) covering bedrock classed as a skim (i.e. less than
+            # 6.0m deep), bedrock is used for subsequent foundation
+            # calculations
+            soiltype = soil_point[-2]
+            soildepth = np.inf
+            
+        elif totsoillayerdep > 6.0:
+            
+            # For deep sediments over bedrock assume soil is homogeneous and
+            # based on the soil type with the deepest layer
+            layermax = max(soillayerdep, key=operator.itemgetter(1))
+            
+            soiltype = layermax[0]
+            soildepth = totsoillayerdep
+            
+        return soiltype, soildepth
+    
+    @classmethod
+    def _get_soil_group(cls, soiltype):
+        
+        if soiltype in ('ls', 'ms', 'ds'): 
+            soilgroup = 'cohesionless'
+        elif soiltype in ('vsc', 'sc', 'fc', 'stc'): 
+            soilgroup = 'cohesive'
+        elif soiltype in ('hgt', 'cm', 'src', 'hr', 'gc'): 
+            soilgroup = 'other'
+        else:
+            errStr = "Soil type '{}' is not recognised".format(soiltype)
+            raise ValueError(errStr)
+            
+        return soilgroup
