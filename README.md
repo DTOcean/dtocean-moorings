@@ -1,3 +1,8 @@
+[![appveyor](https://ci.appveyor.com/api/projects/status/github/DTOcean/dtocean-moorings?branch=master&svg=true)](https://ci.appveyor.com/project/DTOcean/dtocean-moorings)
+[![codecov](https://codecov.io/gh/DTOcean/dtocean-moorings/branch/master/graph/badge.svg)](https://codecov.io/gh/DTOcean/dtocean-moorings)
+[![Lintly](https://lintly.com/gh/DTOcean/dtocean-moorings/badge.svg)](https://lintly.com/gh/DTOcean/dtocean-moorings/)
+[![release](https://img.shields.io/github/release/DTOcean/dtocean-moorings.svg)](https://github.com/DTOcean/dtocean-moorings/releases/latest)
+
 ## Component database keys and values
 
 * item1: Mooring or foundation system

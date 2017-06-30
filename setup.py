@@ -70,6 +70,7 @@ setup(name='dtocean-moorings',
                     'damm_horse@yahoo.co.uk'),
       license="GPLv3",
       install_requires=['numpy',
+                        'pandas',
                         'polite>=0.9',
                         'scipy' ],
 	   package_data={'dtocean_moorings': ['config/*.yaml']
