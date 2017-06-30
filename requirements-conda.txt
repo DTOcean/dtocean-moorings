@@ -1,0 +1,11 @@
+# REQUIREMENTS FOR CONDA INSTALLATION
+
+# INSTALLATION REQUIRED DEPENDENCIES
+numpy
+pandas
+polite >=0.9
+scipy
+
+# TEST DEPENDENCIES
+pytest-cov
+pytest-mock
