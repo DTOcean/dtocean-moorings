@@ -1592,20 +1592,13 @@ class Found(Moor, Loads):
                             self.minloadindex[j]]))
                             + shkeyres[self.minloadindex[j]])
                     elif self.soilgroup[j] == 'other':  
-                        """ Sliding resistance on hard surfaces. 
-                            Note: this formulation needs to be 
-                            checked """
-                        reqfoundweight[j] = ((((
-                            self._variables.foundsf 
-                            + self.soilfric * math.tan(
-                            self.seabedslp[j][
-                            self.maxloadindex[j]])) 
-                            * math.fabs(self.horzfoundloads[j][
-                                self.maxloadindex[j]])) / (self.soilfric 
-                            - self._variables.foundsf * math.tan(
-                            self.seabedslp[j][
-                            self.maxloadindex[j]]))) 
-                            + self.vertfoundloads[j])
+                        # Sliding resistance on hard surfaces.
+                        maxloadindex = self.maxloadindex[j]
+                        slope_angle = self.seabedslp[j][maxloadindex]
+                        horz_load = self.horzfoundloads[j][maxloadindex]
+                        resistance = self._get_sliding_resistance(slope_angle,
+                                                                  horz_load)
+                        reqfoundweight[j] = resistance + self.vertfoundloads[j]
                         keyheight = 0.0                        
                         """ If required foundation weight is 
                             negative (i.e. when the foundation is 
@@ -4116,3 +4109,25 @@ class Found(Moor, Loads):
                                          'grout type [-]', 
                                          'grout volume [m3]'])       
         
+    def _get_sliding_resistance(self, slope_angle,
+                                      horizontal_load):
+        
+        """Sliding resistance on hard surfaces. 
+        Note: this formulation needs to be checked
+        """
+        
+        numerator = 1 + self.soilfric * math.tan(slope_angle)
+        denominator = self.soilfric - math.tan(slope_angle)                              
+        
+        if denominator <= 0.:
+            angle = math.degrees(slope_angle)
+            errStr = ("Slope angle {} exceeds limiting friction "
+                      "angle").format(angle)
+            raise RuntimeError(errStr)
+        
+        horizontal_required = math.fabs(horizontal_load) * \
+                                           numerator / denominator
+                                                              
+        result = self._variables.foundsf * horizontal_required
+        
+        return result

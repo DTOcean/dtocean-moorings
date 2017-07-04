@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Split core module into 5 separate modules, one for each class.
 - Broke down Loads.gpnearloc into smaller functions and fixed various bugs.
 - Fix use of gpnear coordinate for finding seabed slope in Foundations class.
+- Catch slope angle exceeding friction angle for gravity or shallow
+  foundations.
 
 ## [1.0.0] - 2017-01-05
 
