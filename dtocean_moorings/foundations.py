@@ -4112,12 +4112,12 @@ class Found(Moor, Loads):
     def _get_sliding_resistance(self, slope_angle,
                                       horizontal_load):
         
-        """Sliding resistance on hard surfaces. 
+        """Sliding resistance on hard surfaces.
         Note: this formulation needs to be checked
         """
         
         numerator = 1 + self.soilfric * math.tan(slope_angle)
-        denominator = self.soilfric - math.tan(slope_angle)                              
+        denominator = self.soilfric - math.tan(slope_angle)              
         
         if denominator <= 0.:
             angle = math.degrees(slope_angle)
