@@ -299,8 +299,8 @@ class Umb(object):
                     break
                 
                 if (math.fabs(errumbxf) < disttol * umbxf  and math.fabs(errumbzf) < disttol * umbzf): 
-                    logmsg = [""]
-                    logmsg.append('Umbilical converged, max tension  {}'.format([max(Tumb), umbleng]))
+                    logmsg = ('Umbilical converged, max tension: '
+                              '{}').format([max(Tumb), umbleng])
                     module_logger.info(logmsg)
                     break  
             """ Maximum tension """
@@ -352,9 +352,14 @@ class Umb(object):
                 self.umbtenmax[wc] = umbtenmax
                 self.umbradmin[wc] = umbradmin
                 self.umbleng = umbleng
-                logmsg = [""]
-                logmsg.append('Umbilical upper end loads and horizontal angle {}'.format([HumbloadX,HumbloadY,Vumbload, Humbloadang]))
+                
+                logmsg = ('Umbilical upper end loads and horizontal angle '
+                          '{}').format([HumbloadX,
+                                        HumbloadY,
+                                        Vumbload,
+                                        Humbloadang])
                 module_logger.info(logmsg)
+                
                 if self._variables.systype in ('wavefloat', 'tidefloat'):
                     for zind, zval in enumerate(zumb):
                         flipzumb[zind] = -(zval - umbtopconn[2])
