@@ -938,9 +938,8 @@ class Loads(object):
                 if (math.fabs(90.0 - math.fabs(max(fexdirs) - min(fexdirs))) < wavedirtol
                     or math.fabs(180.0 - math.fabs(max(fexdirs) - min(fexdirs))) < wavedirtol):
                     if math.fabs(90.0 - math.fabs(max(fexdirs) - min(fexdirs))) < wavedirtol:
-                        logmsg = [""]       
-                        logmsg.append('Double body symmetry assumed')                        
-                        module_logger.info("\n".join(logmsg))
+                        logmsg = 'Double body symmetry assumed'                
+                        module_logger.info(logmsg)
                         fexsym90flag = 'True'
                         fexdirsnew = []
                         fexdirinds = range(0,len(fexdirs))
@@ -971,9 +970,8 @@ class Loads(object):
                             fexraovaluesnew[mode] = addfexvalues
                         fexraovaluesnew = np.array(fexraovaluesnew)   
                     elif math.fabs(180.0 - math.fabs(max(fexdirs) - min(fexdirs))) < wavedirtol:
-                        logmsg = [""]       
-                        logmsg.append('Single body symmetry assumed') 
-                        module_logger.info("\n".join(logmsg))
+                        logmsg = 'Single body symmetry assumed'
+                        module_logger.info(logmsg)
                         fexsym180flag = 'True'
                         fexdirsnew = []
                         fexdirinds = range(0,len(fexdirs))
@@ -1001,8 +999,7 @@ class Loads(object):
                     fexraovaluesnew = fexraovalues
                     fexdirsnew = np.array(fexdirs)                     
                 if all(i == 1 for i in fexmodes):
-                    logmsg = [""]       
-                    logmsg.append('Full set of first-order wave load RAOs provided')
+                    logmsg = 'Full set of first-order wave load RAOs provided'
                     fexfullset = 'True'
                 for tpind in range(0, len(self._variables.tp)):
                     nearfreqinds = [0 for col in range(0,2)]
@@ -1061,8 +1058,10 @@ class Loads(object):
                                                                      bounds_error=False)                                                                     
                                     fexrao[tpind][mode] = fexraoint(wavefreqs[tpind])                          
                         elif fexmodes[mode] == 0:
-                            logmsg.append('First-order wave load RAOs not provided for mode {}'.format(mode))  
-                    """ X-Y values flipped to stick with WAMIT convention """      
+                            logmsg = ('First-order wave load RAOs not '
+                                      'provided for mode {}').format(mode)
+                    """ X-Y values flipped to stick with WAMIT convention """   
+                    
                     if self.waveangattk[tpind] >= 0.0 and self.waveangattk[tpind] <= 90.0:
                         self.syswaveload[tpind][0] = 0.5 * self.hmax[tpind] * fexrao[tpind][1] 
                         self.syswaveload[tpind][1] = 0.5 * self.hmax[tpind] * fexrao[tpind][0]
@@ -1081,7 +1080,7 @@ class Loads(object):
                     # logmsg.append('self.syswaveload[tpind]  {}'.format(self.syswaveload))
                     # logmsg.append('raovalues  {}'.format(fexraovalues))
                     # logmsg.append('fexfreqs  {}'.format(fexfreqs))
-                    module_logger.info("\n".join(logmsg)) 
+                    module_logger.info(logmsg)
                         
                     """ Find maximum resultant wave load due to wave conditions 
                         along upper contour """

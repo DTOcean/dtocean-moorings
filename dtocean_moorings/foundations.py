@@ -1410,7 +1410,7 @@ class Found(Moor, Loads):
                             keyheight = 0.1 * basewidth  
                             """ Minimum foundation weight required 
                                 to resist sliding in maximum load 
-                                direction """   
+                                direction """
                             reqfoundweight[j] = ((((
                                 self._variables.foundsf 
                                 + self.soilfric * math.tan(
@@ -2187,9 +2187,8 @@ class Found(Moor, Loads):
                         basedim = [basewidth, baseleng, baseheight, 
                                    skirtheight, keyheight, nshkeys, 
                                    shkeyspc, reqconvol[j], reqsteelvol[j]]
-                        logmsg = [""]
-                        logmsg.append('Solution found {}'.format(basedim))
-                        module_logger.info("\n".join(logmsg))
+                        logmsg = 'Solution found {}'.format(basedim)
+                        module_logger.info(logmsg)
                         self.founddesfail[j] = 'False' 
                     elif baseheight == 0.0:
                         module_logger.warn('WARNING: Resultant design load at padeye equal to zero, setting minimum foundation size')                        
@@ -2386,9 +2385,9 @@ class Found(Moor, Loads):
                             altered """
                         for q in range(0,klim):                            
                             if posftyps[0] in self.unsuitftyps:
-                                logmsg = [""]
-                                logmsg.append('!!! Solution not found, foundation type unsuitable !!!')
-                                module_logger.info("\n".join(logmsg)) 
+                                logmsg = ('!!! Solution not found, foundation '
+                                          'type unsuitable !!!')
+                                module_logger.info(logmsg)
                                 self.foundnotfoundflag[posftyps[0]][j] = 'True'
                                 piledim = ['n/a', 'n/a', 'n/a', 
                                                'n/a', 'n/a', 
@@ -3024,9 +3023,8 @@ class Found(Moor, Loads):
                                     piledim = [piledia, pilethk, pileleng, 
                                                pilecloseend, pilecompind, 
                                                pilegroutdia]
-                                    logmsg = [""]
-                                    logmsg.append('Solution found {}'.format(piledim))
-                                    module_logger.info("\n".join(logmsg))   
+                                    logmsg = 'Solution found {}'.format(piledim)
+                                    module_logger.info(logmsg)
                                     self.founddesfail[j] = 'False' 
                                     break
                                     
@@ -3249,9 +3247,8 @@ class Found(Moor, Loads):
                                 caisscompind = caissmindia[0] 
                                 caissdim = [caissdia, caissthk, caissleng, 
                                             caisscompind]
-                                logmsg = [""]
-                                logmsg.append('Solution found {}'.format(caissdim))
-                                module_logger.info("\n".join(logmsg))  
+                                logmsg = 'Solution found {}'.format(caissdim)
+                                module_logger.info(logmsg)
                                 self.founddesfail[j] = 'False' 
                                 break
                             if k == klim - 1:
@@ -3500,9 +3497,8 @@ class Found(Moor, Loads):
                                     platethk = 0.05 * platewidth                                    
                                     platedim = [platewidth, plateleng, 
                                                 platethk, embeddepth]
-                                    logmsg = [""]                                    
-                                    logmsg.append('Solution found {}'.format(platedim))
-                                    module_logger.info("\n".join(logmsg))  
+                                    logmsg = 'Solution found {}'.format(platedim)
+                                    module_logger.info(logmsg)
                                     self.founddesfail[j] = 'False'                                    
                                     break
                                 else:
@@ -3589,9 +3585,8 @@ class Found(Moor, Loads):
                                     increase minimum anchor weight """
                                 complim = [ancminweight[1], reqmoorconnsize]
                             elif ancholdcap >= resdesload[j]:                                                       
-                                logmsg = [""]                                    
-                                logmsg.append('Solution found {}'.format(ancminweight))
-                                module_logger.info("\n".join(logmsg))
+                                logmsg = 'Solution found {}'.format(ancminweight)
+                                module_logger.info(logmsg)
                                 break   
                             elif k == klim - 1:
                                 """ For when a solution cannot be found """ 
@@ -3673,13 +3668,16 @@ class Found(Moor, Loads):
                 self.substconfigfootarea = (math.pi / 4.0) * max(self.foundrad) ** 2.0
                 self.substconfigvol = ((math.pi / 4.0) * max(self.foundrad) ** 2.0 
                                         * self.bathysysorig)
+        
+        logmsg = []
         if self.piledim:
-            logmsg.append('self.piledim {}'.format(self.piledim))
+            logmsg.append('self.piledim: {}'.format(self.piledim))
         if self.pileyld:
-            logmsg.append('self.pileyld {}'.format(self.pileyld))
-            if 'other' in self.soilgroup:
-                logmsg.append('self.groutpilebondstr {}'.format(self.groutpilebondstr))
-        module_logger.info("\n".join(logmsg))
+            logmsg.append('self.pileyld: {}'.format(self.pileyld))
+            if 'other' in self.soilgroup and self.groutpilebondstr is not None:
+                logmsg.append('self.groutpilebondstr {}'.format(
+                                                        self.groutpilebondstr))
+        module_logger.debug("\n".join(logmsg))
                                         
     def foundcost(self):
         """ Foundation capital cost calculations based on number of foundation 
@@ -3783,7 +3781,7 @@ class Found(Moor, Loads):
         logmsg = [""]              
         logmsg.append('self.possfoundtyp {}'.format(self.possfoundtyp))            
         logmsg.append('self.selfoundtyp {}'.format(self.selfoundtyp))            
-        module_logger.info("\n".join(logmsg))  
+        module_logger.debug(" ".join(logmsg))
         for j in range(0, self.quanfound):            
             if (self.selfoundtyp[j][0] not in ('Foundation not required', 'Foundation solution not found')):
                 if self.selfoundtyp[j][0] == 'pile':

@@ -1451,10 +1451,11 @@ class Moor(Umb, Loads):
                                     - foundloc[j][2]) 
                                     
                         if m == mlim:
-                            logmsg = [""]                                
-                            logmsg.append('Position not converged: [Hloadcheck, Vloadcheck] {}'.format([Hloadcheck, Vloadcheck]))
-                            module_logger.info("\n".join(logmsg)) 
-                            continue  
+                            logmsg = ('Position not converged: [Hloadcheck, '
+                                      'Vloadcheck] {}').format([Hloadcheck,
+                                                                Vloadcheck])
+                            module_logger.info(logmsg)
+                            continue
                             
                         if limitstate == 'ALS':                            
                             ancten[0] = [[0.0, 0.0, 0.0] for row in range(0, self.numlines)]   
@@ -1468,8 +1469,8 @@ class Moor(Umb, Loads):
                     if l >= 2:
                         logmsg = [""]
                         logmsg.append('_________________________________________________________________________') 
-                        logmsg.append('System applied loads [HsysloadX, HsysloadX, Vfsys] {}'.format([-(HsysloadX + HumbloadX), 
-                                                                                                      -(HsysloadY + HumbloadY), 
+                        logmsg.append('System applied loads [HsysloadX, HsysloadY, Vfsys] {}'.format([float(-(HsysloadX + HumbloadX)), 
+                                                                                                      float(-(HsysloadY + HumbloadY)), 
                                                                                                       Vfsys[l] - (self._variables.gravity 
                                                                                                         * (self._variables.seaden 
                                                                                                         * subvol
