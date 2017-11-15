@@ -1043,20 +1043,22 @@ class Loads(object):
                                                                  [fexraovaluesnew[mode][neardirinds[0]][nearfreqinds],
                                                                   fexraovaluesnew[mode][neardirinds[1]][nearfreqinds]],
                                                                  bounds_error=False)
-                                fexrao[tpind][mode] = fexraoint(wavefreqs[tpind], self.waveangattk[tpind])                                
+                                fexrao[tpind][mode] = fexraoint(wavefreqs[tpind], self.waveangattk[tpind])
                             else: 
                                 if (len(nearfreqinds) == 1 and len(neardirinds) > 1):
                                     fexraoint = interpolate.interp1d(fexdirsnew[neardirinds],
                                                                      [fexraovaluesnew[mode][neardirinds[0]][nearfreqinds[0]],
                                                                       fexraovaluesnew[mode][neardirinds[1]][nearfreqinds[0]]],
-                                                                     bounds_error=False)                                                                     
-                                    fexrao[tpind][mode] = fexraoint(self.waveangattk[tpind])                                  
+                                                                     bounds_error=False,
+                                                                     fill_value="extrapolate")                                                                   
+                                    fexrao[tpind][mode] = fexraoint(self.waveangattk[tpind])
                                 elif (len(nearfreqinds) > 1 and len(neardirinds) == 1):
                                     fexraoint = interpolate.interp1d(fexfreqs[nearfreqinds],
                                                                      [fexraovaluesnew[mode][neardirinds[0]][nearfreqinds[0]],
                                                                       fexraovaluesnew[mode][neardirinds[0]][nearfreqinds[1]]],
-                                                                     bounds_error=False)                                                                     
-                                    fexrao[tpind][mode] = fexraoint(wavefreqs[tpind])                          
+                                                                     bounds_error=False,
+                                                                     fill_value="extrapolate")
+                                    fexrao[tpind][mode] = fexraoint(wavefreqs[tpind])
                         elif fexmodes[mode] == 0:
                             logmsg = ('First-order wave load RAOs not '
                                       'provided for mode {}').format(mode)
