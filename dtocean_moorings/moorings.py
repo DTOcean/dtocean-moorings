@@ -586,7 +586,7 @@ class Moor(Umb, Loads):
                                     foundloc[j][0] = 0.01
                                 linexf[j] = math.sqrt((fairloc[j][0] + syspos[0] - foundloc[j][0]) ** 2.0 
                                     + (fairloc[j][1] + syspos[1] - foundloc[j][1]) ** 2.0)
-                                linezf[j] = fairloc[j][2] - foundloc[j][2]  
+                                linezf[j] = fairloc[j][2] - self._variables.sysdraft - foundloc[j][2]
                             
                             if l == 0:
                                 """ Equilibrium of lines only """
