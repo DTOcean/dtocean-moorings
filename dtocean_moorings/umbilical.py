@@ -55,7 +55,8 @@ class Umb(object):
 
     """
     
-    def __init__(self, variables):        
+    def __init__(self, variables):
+        super(Umb, self).__init__(variables)
         self._variables = variables
         
     def umbdes(self, deviceid, syspos, wc, umbconpt, l):
