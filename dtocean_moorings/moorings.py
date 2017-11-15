@@ -1439,7 +1439,7 @@ class Moor(Umb, Loads):
                                             * math.pi / 180.0) + syspos[1] 
                                             * math.cos(-self._variables.sysorienang * math.pi 
                                             / 180.0)) + self._variables.sysorig[deviceid][1],
-                                            syspos[2]]
+                                            -syspos[2]]
                             logmsg = [""]
                             logmsg.append(('Draft equilibrium at {} reached '
                                            'after {} run(s)').format(sysdraft,
