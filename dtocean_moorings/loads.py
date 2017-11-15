@@ -925,12 +925,22 @@ class Loads(object):
                     fexmodes2 = np.array(map(int, self._variables.fex[2]))
                     fexraovaluesin = np.array(self._variables.fex[3]) 
                     fexraovalues = np.absolute([fexraovaluesin[1],fexraovaluesin[0],fexraovaluesin[2]])
+                
                 fexsym90flag = 'False'
+                
                 for i in range(0,len(self._variables.tp)):
-                    if ((max(fexfreqs) < 1.0/self._variables.tp[i]) or (min(fexfreqs) > 1.0/self._variables.tp[i])):
-                        errStr = ("Wave period outside of RAO frequency range")
-                        raise RuntimeError(errStr)
-                fexmodes = [fexmodes2[1],fexmodes2[0],fexmodes2[2]]
+                    
+                    if ((max(fexfreqs) < 1.0 / self._variables.tp[i]) or 
+                        (min(fexfreqs) > 1.0 / self._variables.tp[i])):
+                        
+                        warnStr = ("Wave period outside of RAO frequency "
+                                   "range: {} <= {} <= {}").format(
+                                                  min(fexfreqs),
+                                                  1.0 / self._variables.tp[i],
+                                                  max(fexfreqs))
+                        module_logger.warn(warnStr)
+                
+                fexmodes = [fexmodes2[1], fexmodes2[0], fexmodes2[2]]
                 
                 """ If difference between maximum and minimum specified directions is 90 deg, assumed 
                     that the device has symmetry about the x and y axes """   
