@@ -3792,7 +3792,10 @@ class Found(Moor, Loads):
                         self.listfoundcomp.append(self.selfoundgrouttypdict[j][self.selfoundtyp[j][0]])
                 elif self.selfoundtyp[j][0] == 'suctioncaisson':
                     self.listfoundcomp.append(self.caissdim[j][3])
-                else: self.listfoundcomp.append(self.selfoundtyp[j][0]) 
+                elif self.selfoundtyp[j][0] == 'drag':
+                    self.listfoundcomp.append(self.seldraganc[j])
+                else:
+                    self.listfoundcomp.append(self.selfoundtyp[j][0]) 
             else:
                 self.listfoundcomp.append(self.selfoundtyp[j][0])
                 
