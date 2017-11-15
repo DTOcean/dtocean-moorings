@@ -1936,8 +1936,8 @@ class Loads(object):
     
     def _set_fairloc(self, quanfound=None):
         
-        if quanfound is not None:
-            assert len(self._variables.fairloc) == quanfound
+#        if quanfound is not None:
+#            assert len(self._variables.fairloc) == quanfound
         
         if not self.foundradnew: self.fairloc = self._variables.fairloc
         self.fairlocglob = self.fairloc[:]
