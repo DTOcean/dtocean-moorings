@@ -1004,19 +1004,16 @@ class Moor(Umb, Loads):
                                     errzf[k] = zf[k] - linezf[j]
                                     
                                     """ Jacobian matrix """
-                                    jac = np.matrix([[xfdHf[k], xfdVf[k]], 
-                                                     [zfdHf[k], zfdVf[k]]])
-                                    
-                                    if np.linalg.det(jac) == 0.0:
-                                        update = np.matrix([[0.0],[0.0]])
-                                    else:
-                                        """ Inverse of Jacobian matrix """                
-                                        invjac = np.linalg.inv(jac)
-                                                    
-                                        """ Update Hf and Vf """
-                                        update =  invjac * np.matrix([[-xf[k]],
-                                                                      [-zf[k]]])
+                                    jac = np.array([[xfdHf[k], xfdVf[k]], 
+                                                    [zfdHf[k], zfdVf[k]]])
                                     det = np.linalg.det(jac)
+                                    
+                                    if abs(det) < 1e-8:
+                                        update = np.array([[0.0], [0.0]])
+                                    else:
+                                        x = np.array([[-xf[k]], [-zf[k]]])
+                                        update = np.linalg.solve(jac, x)
+                                    
                                     dHf[k] = update.item(0)
                                     dVf[k] = update.item(1)          
                                     
