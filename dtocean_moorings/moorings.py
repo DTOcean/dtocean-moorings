@@ -809,10 +809,9 @@ class Moor(Umb, Loads):
                                     if Hloadcheck == 'False':
                                         Vf[0] = Vfline[j]   
                                     elif Hloadcheck == 'True':
-                                        Vf[0] = Vfsys[l] / self.numlines 
-                            
+                                        Vf[0] = Vfsys[l] / self.numlines
+                                                                    
                             lineconvfailflag[j] = 'False'
-                            
                             
                             if m > 1:               
                                 if 'rope' in self.moorcomptab.index: 
@@ -848,8 +847,7 @@ class Moor(Umb, Loads):
                                                             * self.moorcomptab.ix[self.ropeeaind,'mbl']
                                                             / (ropestrains[1] - ropestrains[0])))
                                     """ Update average line axial stiffness """
-                                    ea = ropeea 
-                                
+                                    ea = ropeea
                             
                             for n in range(1, nlim):    
                                 if lineconvfailflag[j] == 'True':
@@ -1171,10 +1169,9 @@ class Moor(Umb, Loads):
                                 else:
                                     lineten[2+wc][j] = lineten[2+wc][j]
                                 linetenind = 2 + wc 
-                                
                         
                         # """ If calculated  line tensions are higher than the capacity of 
-                        # the components abort run """ 
+                        # the components abort run """                        
                         if (l >= 1 and  m > 100 and min(self.moorcomptab['mbl'].tolist()) < self.moorsf 
                             * max(lineten[linetenind])):
                                 logmsg = [""]
@@ -1334,7 +1331,6 @@ class Moor(Umb, Loads):
                                 if math.fabs(hsysdisp) < 1.0e-3:
                                     hsysdisp = 1.0e-3 
                             
-                                                     
                             if round(HsysloadX - sum(HflineX), 3) > 0.0:  
                                 syspos[0] = syspos[0] - hsysdisp * math.sin(
                                     math.fabs(errang))
