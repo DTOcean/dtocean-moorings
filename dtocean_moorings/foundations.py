@@ -639,6 +639,7 @@ class Found(Moor, Loads):
     
     def __init__(self, variables):        
         super(Found, self).__init__(variables)
+        self.groutpilebondstr = None
         
     def foundsub(self,deviceid,systype,foundloc,syscog):
         if systype in ('wavefloat','tidefloat'):
