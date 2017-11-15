@@ -697,25 +697,53 @@ class Moor(Umb, Loads):
                             linelengbedk = [0 for row in range(klim)] 
                             
                             if (l == 0 and m == 1):
+                                
                                 sysdraft = self._variables.sysdraft
                                 subvol = self._variables.sysvol
-                            if l >= 1:                                
-                                if m == 1:                                    
-                                    sysdraft = ((1 / (self._variables.seaden 
-                                            * self.syswpa)) * ((sum(Vflineref[l-1]) + Vumbload)
-                                            / self._variables.gravity 
-                                            + self._variables.sysmass))
+                                
+                            if l >= 1:
+                                
+                                if m == 1:
                                     
-                                    linezf[j] = ((fairloc[j][2]  - (sysdraft 
-                                            - self._variables.sysdraft)) 
-                                            - foundloc[j][2]) 
-                               
-                                if sysdraft > 0.0:
-                                    subvol = self.syswpa * sysdraft
-                                else: 
+                                    devdraft = self._variables.sysmass / \
+                                        (self._variables.seaden * self.syswpa)
+                                        
+                                    # Check the given equilibrium draft
+                                    draft_diff = abs(self._variables.sysdraft -
+                                                                     devdraft)
+                                    draft_delta = draft_diff / \
+                                                    self._variables.sysdraft
+                                    
+                                    if draft_delta > 0.05:
+                                        
+                                        errMsg = ("Calculated draft of {}m "
+                                                  "exceeds the given "
+                                                  "equilibrium  draft {}m by "
+                                                  "{}%. Consider changing the "
+                                                  "system mass or submerged "
+                                                  "volume").format(
+                                                      devdraft,
+                                                      self._variables.sysdraft,
+                                                      int(draft_delta * 100))
+                                        
+                                        raise RuntimeError(errMsg)
+                                    
+                                    umbload = sum(Vflineref[l - 1]) + Vumbload
+                                    umbmass = umbload / self._variables.gravity
+                                    umbdraft = umbmass / \
+                                        (self._variables.seaden * self.syswpa)
+                                    
+                                    sysdraft = devdraft + umbdraft
+                                    
+                                    linezf[j] = fairloc[j][2] - sysdraft - \
+                                                                 foundloc[j][2]
+                                
+                                if sysdraft <= 0.0:
                                     subvol = 0.0
-                                """ Float fully submerged """
-                                if sysdraft > self._variables.sysheight:
+                                elif sysdraft > self._variables.sysheight:
+                                    subvol = self.syswpa * \
+                                                    self._variables.sysheight
+                                else: 
                                     subvol = self.syswpa * sysdraft
                                 
                                 if l >= 2: 
