@@ -61,20 +61,20 @@ def test_set_fairloc(mocker):
     assert np.isclose(test.fairlocglob, variables.fairloc).all()
 
 
-def test_set_fairloc_assert(mocker):
+# def test_set_fairloc_assert(mocker):
     
-    # Mock the variables class
-    variables = mocker.Mock()
-    variables.fairloc = np.array([[0.0, 1.0, -1.5],
-                                  [1.0, 0.0, -1.5],
-                                  [0.0, -1.0, -1.5],
-                                  [-1.0, 0.0, -1.5]])
+    # # Mock the variables class
+    # variables = mocker.Mock()
+    # variables.fairloc = np.array([[0.0, 1.0, -1.5],
+                                  # [1.0, 0.0, -1.5],
+                                  # [0.0, -1.0, -1.5],
+                                  # [-1.0, 0.0, -1.5]])
     
-    test = Loads(variables)
+    # test = Loads(variables)
     
-    with pytest.raises(AssertionError):
-        test._set_fairloc(3)
-        
+    # with pytest.raises(AssertionError):
+        # test._set_fairloc(3)
+
 
 @pytest.mark.parametrize("systype", [
         'wavefloat', 
