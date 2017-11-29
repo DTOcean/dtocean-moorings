@@ -1250,16 +1250,22 @@ class Found(Moor, Loads):
                     
                     ancminweight = min(ancweights, key=operator.itemgetter(1))
                     
+                    if ancminweight[0] == 0:
+                        return ancminweight, [0.0, 0.0]
                     
-                    if ancminweight[0] != 0:
-                        if self.soiltyp[j] in ('vsc', 'sc'):
-                            """ Coefficients for soft clays and muds """
-                            anccoef = self._variables.compdict[ancminweight[0]]['item9']['soft']
-                        elif self.soiltyp[j] in ('fc', 'stc', 'ls', 'ms', 'ds'):
-                            """ Coefficients for stiff clays and sands """
-                            anccoef = self._variables.compdict[ancminweight[0]]['item9']['sand']
+                    item9 = self._variables.compdict[ancminweight[0]]['item9']
+                        
+                    if self.soiltyp[j] in ('vsc', 'sc'):
+                        # Coefficients for soft clays and muds
+                        anccoef = item9['soft']
+                    elif self.soiltyp[j] in ('fc', 'stc', 'ls', 'ms', 'ds'):
+                        # Coefficients for stiff clays and sands
+                        anccoef = item9['sand']
                     else:
-                        anccoef = [0.0, 0.0]
+                        errMsg = ("Drag anchors are not applicable to "
+                                  "soil type: {}").format(self.soiltyp[j])
+                        raise RuntimeError(errMsg)
+                    
                     return ancminweight, anccoef
                     
         def buriedline(embeddepth, resdesload, resdesloadang, omega):
