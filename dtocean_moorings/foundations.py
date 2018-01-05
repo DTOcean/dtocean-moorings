@@ -1270,7 +1270,7 @@ class Found(Moor, Loads):
                                      self._variables.compdict[comps]['item7'][0]))   
                         if not ancweights:
                             """ If a suitable anchor still can not be found, abort search """
-                            ancweights = [0, 0]
+                            ancweights = [(0, 0)]
                     
                     ancminweight = min(ancweights, key=operator.itemgetter(1))
                     
@@ -1286,9 +1286,11 @@ class Found(Moor, Loads):
                         # Coefficients for stiff clays and sands
                         anccoef = item9['sand']
                     else:
-                        errMsg = ("Drag anchors are not applicable to "
-                                  "soil type: {}").format(self.soiltyp[j])
-                        raise RuntimeError(errMsg)
+                        warnMsg = ("Drag anchors are not applicable to "
+                                   "soil type: {}").format(self.soiltyp[j])
+                        module_logger.warning(warnMsg)
+                        
+                        return ancminweight, [0.0, 0.0]
                     
                     return ancminweight, anccoef
                     
@@ -1629,6 +1631,19 @@ class Found(Moor, Loads):
                         horz_load = self.horzfoundloads[j][maxloadindex]
                         resistance = self._get_sliding_resistance(slope_angle,
                                                                   horz_load)
+                        
+                        # Abort if no resistance found
+                        if not resistance:
+                            
+                            self.foundnotfoundflag[posftyps[0]][j] = 'True'
+                            basedim = [np.nan, np.nan, 'n/a', 
+                                       0.0, 0.0, 0, 
+                                       0.0, np.nan, np.nan]                  
+                            if posftyps[0] not in self.unsuitftyps:
+                                self.unsuitftyps.append(posftyps[0])  
+                                
+                            return basedim
+                        
                         reqfoundweight[j] = resistance + self.vertfoundloads[j]
                         keyheight = 0.0                        
                         """ If required foundation weight is 
