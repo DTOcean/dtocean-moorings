@@ -4195,10 +4195,14 @@ class Found(Moor, Loads):
         denominator = self.soilfric - math.tan(slope_angle)              
         
         if denominator <= 0.:
+            
             angle = math.degrees(slope_angle)
-            errStr = ("Slope angle {} exceeds limiting friction "
-                      "angle").format(angle)
-            raise RuntimeError(errStr)
+            
+            warnStr = ("Slope angle {} exceeds limiting friction "
+                       "angle").format(angle)
+            module_logger.warning(warnStr)
+            
+            return False
         
         horizontal_required = math.fabs(horizontal_load) * \
                                            numerator / denominator
