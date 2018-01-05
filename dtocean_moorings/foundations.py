@@ -640,6 +640,8 @@ class Found(Moor, Loads):
     def __init__(self, variables):        
         super(Found, self).__init__(variables)
         self.groutpilebondstr = None
+        self.prefound = None
+        self.selfoundtyp = None
         
     def foundsub(self,deviceid,systype,foundloc,syscog):
         if systype in ('wavefloat','tidefloat'):
@@ -932,7 +934,8 @@ class Found(Moor, Loads):
                 + self.vertfoundloads[j] ** 2.0)        
         
     def foundsel(self,systype): 
-        """ Select suitable foundation types """ 
+        """ Select suitable foundation types """
+        
         self.possfoundtyp = [0 for row in range(self.quanfound)]
         self.foundtyps = {'shallowfoundation', 
                           'gravity', 
@@ -941,246 +944,267 @@ class Found(Moor, Loads):
                           'directembedment', 
                           'drag'}
         
-        """ Selection of possible foundations """
-        if self._variables.prefound: 
-            module_logger.info('Foundation or anchor type already selected')
+        self.founduniformflag = 'False'
+        
+        # Check for preferred foundation type or uniary design
+        if self._variables.prefound is not None: 
+            
             if self._variables.prefound[0:3] == 'uni':
+                
                 self.founduniformflag = 'True'
                 self.prefound = self._variables.prefound[6:]
+                
+                msgStr = ('Uniary foundation design requested')
+                module_logger.info(msgStr)
+                
             else:
-                self.founduniformflag = 'False'
+                
                 self.prefound = self._variables.prefound
-
-            self.selfoundtyp = [[self.prefound] for row 
-                                    in range(self.quanfound)]
-            self.possfoundtyp = [([(self.prefound, 0)]) for row 
-                                    in range(self.quanfound)]           
-        else:    
-            self.founduniformflag = 'False'
-            self.foundsoiltypdict = {'vsc': {'shallowfoundation': 1, 
+                
+            if not self.prefound:
+                
+                self.prefound = None
+                
+            else:
+            
+                msgStr = ('Prefered foundation type {} '
+                          'selected').format(self.prefound)
+                module_logger.info(msgStr)
+        
+        self.foundsoiltypdict = {'vsc': {'shallowfoundation': 1, 
+                                         'gravity': 1, 
+                                         'pile': 2, 
+                                         'suctioncaisson': 1, 
+                                         'directembedment': 1, 
+                                         'drag': 1},
+                                 'sc': {'shallowfoundation': 1, 
+                                        'gravity': 1, 
+                                        'pile': 2, 
+                                        'suctioncaisson': 1, 
+                                        'directembedment': 1, 
+                                        'drag': 1},
+                                 'fc': {'shallowfoundation': 1, 
+                                        'gravity': 1, 
+                                        'pile': 1, 
+                                        'suctioncaisson': 88, 
+                                        'directembedment': 1, 
+                                        'drag': 1},
+                                 'stc': {'shallowfoundation': 1, 
+                                         'gravity': 1, 
+                                         'pile': 1, 
+                                         'suctioncaisson': 88, 
+                                         'directembedment': 1, 
+                                         'drag': 1},
+                                 'ls': {'shallowfoundation': 1, 
+                                        'gravity': 1, 
+                                        'pile': 1, 
+                                        'suctioncaisson': 1, 
+                                        'directembedment': 1, 
+                                        'drag': 1},
+                                 'ms': {'shallowfoundation': 1, 
+                                        'gravity': 1, 
+                                        'pile': 1, 
+                                        'suctioncaisson': 1, 
+                                        'directembedment': 1, 
+                                        'drag': 1},                               
+                                 'ds': {'shallowfoundation': 1, 
+                                        'gravity': 1, 
+                                        'pile': 1, 
+                                        'suctioncaisson': 1, 
+                                        'directembedment': 1, 
+                                        'drag': 1},
+                                 'hgt': {'shallowfoundation': 2, 
+                                         'gravity': 1, 
+                                         'pile': 1, 
+                                         'suctioncaisson': 88, 
+                                         'directembedment': 88, 
+                                         'drag': 88},
+                                 'cm': {'shallowfoundation': 2, 
+                                        'gravity': 1, 
+                                        'pile': 1, 
+                                        'suctioncaisson': 88, 
+                                        'directembedment': 88, 
+                                        'drag': 88},                    
+                                 'gc': {'shallowfoundation': 88, 
+                                        'gravity': 1, 
+                                        'pile': 88, 
+                                        'suctioncaisson': 88, 
+                                        'directembedment': 88, 
+                                        'drag': 88},
+                                 'src': {'shallowfoundation': 88, 
+                                         'gravity': 1, 
+                                         'pile': 1, 
+                                         'suctioncaisson': 88, 
+                                         'directembedment': 88, 
+                                         'drag': 88},
+                                 'hr': {'shallowfoundation': 88, 
+                                        'gravity': 1, 
+                                        'pile': 2, 
+                                        'suctioncaisson': 88, 
+                                        'directembedment': 88, 
+                                        'drag': 88}}
+        self.foundslopedict = {'moderate': {'shallowfoundation': 1, 
+                                            'gravity': 1, 
+                                            'pile': 1, 
+                                            'suctioncaisson': 1, 
+                                            'directembedment': 1, 
+                                            'drag': 1},
+                               'steep': {'shallowfoundation': 88, 
+                                         'gravity': 88, 
+                                         'pile': 1, 
+                                         'suctioncaisson': 2, 
+                                         'directembedment': 2, 
+                                         'drag': 88}}
+        self.foundsoildepdict = {'none': {'shallowfoundation': 88, 
+                                          'gravity': 1, 
+                                          'pile': 1, 
+                                          'suctioncaisson': 88, 
+                                          'directembedment': 88, 
+                                          'drag': 88},
+                                 'veryshallow': {'shallowfoundation': 1, 
+                                                 'gravity': 1, 
+                                                 'pile': 1, 
+                                                 'suctioncaisson': 88, 
+                                                 'directembedment': 88, 
+                                                 'drag': 88},
+                                 'shallow': {'shallowfoundation': 1, 
                                              'gravity': 1, 
-                                             'pile': 2, 
-                                             'suctioncaisson': 1, 
-                                             'directembedment': 1, 
-                                             'drag': 1},
-                    'sc': {'shallowfoundation': 1, 
-                           'gravity': 1, 
-                           'pile': 2, 
-                           'suctioncaisson': 1, 
-                           'directembedment': 1, 
-                           'drag': 1},
-                    'fc': {'shallowfoundation': 1, 
-                           'gravity': 1, 
-                           'pile': 1, 
-                           'suctioncaisson': 88, 
-                           'directembedment': 1, 
-                           'drag': 1},
-                    'stc': {'shallowfoundation': 1, 
-                            'gravity': 1, 
-                            'pile': 1, 
-                            'suctioncaisson': 88, 
-                            'directembedment': 1, 
-                            'drag': 1},
-                    'ls': {'shallowfoundation': 1, 
-                           'gravity': 1, 
-                           'pile': 1, 
-                           'suctioncaisson': 1, 
-                           'directembedment': 1, 
-                           'drag': 1},
-                    'ms': {'shallowfoundation': 1, 
-                           'gravity': 1, 
-                           'pile': 1, 
-                           'suctioncaisson': 1, 
-                           'directembedment': 1, 
-                           'drag': 1},                               
-                    'ds': {'shallowfoundation': 1, 
-                           'gravity': 1, 
-                           'pile': 1, 
-                           'suctioncaisson': 1, 
-                           'directembedment': 1, 
-                           'drag': 1},
-                    'hgt': {'shallowfoundation': 2, 
-                            'gravity': 1, 
-                            'pile': 1, 
-                            'suctioncaisson': 88, 
-                            'directembedment': 88, 
-                            'drag': 88},
-                    'cm': {'shallowfoundation': 2, 
-                           'gravity': 1, 
-                           'pile': 1, 
-                           'suctioncaisson': 88, 
-                           'directembedment': 88, 
-                           'drag': 88},                    
-                    'gc': {'shallowfoundation': 88, 
-                           'gravity': 1, 
-                           'pile': 88, 
-                           'suctioncaisson': 88, 
-                           'directembedment': 88, 
-                           'drag': 88},
-                    'src': {'shallowfoundation': 88, 
-                            'gravity': 1, 
-                            'pile': 1, 
-                            'suctioncaisson': 88, 
-                            'directembedment': 88, 
-                            'drag': 88},
-                    'hr': {'shallowfoundation': 88, 
-                           'gravity': 1, 
-                           'pile': 2, 
-                           'suctioncaisson': 88, 
-                           'directembedment': 88, 
-                           'drag': 88}}
-            self.foundslopedict = {'moderate': {'shallowfoundation': 1, 
-                                                'gravity': 1, 
-                                                'pile': 1, 
-                                                'suctioncaisson': 1, 
-                                                'directembedment': 1, 
-                                                'drag': 1},
-                     'steep': {'shallowfoundation': 88, 
-                               'gravity': 88, 
-                               'pile': 1, 
-                               'suctioncaisson': 2, 
-                               'directembedment': 2, 
-                               'drag': 88}}
-            self.foundsoildepdict = {'none': {'shallowfoundation': 88, 
-                                              'gravity': 1, 
-                                              'pile': 1, 
-                                              'suctioncaisson': 88, 
-                                              'directembedment': 88, 
-                                              'drag': 88},
-                     'veryshallow': {'shallowfoundation': 1, 
-                                     'gravity': 1, 
-                                     'pile': 1, 
-                                     'suctioncaisson': 88, 
-                                     'directembedment': 88, 
-                                     'drag': 88},
-                     'shallow': {'shallowfoundation': 1, 
-                                 'gravity': 1, 
-                                 'pile': 1, 
-                                 'suctioncaisson': 2, 
-                                 'directembedment': 88, 
-                                 'drag': 2},
-                     'moderate': {'shallowfoundation': 1, 
-                                  'gravity': 1, 
-                                  'pile': 1, 
-                                  'suctioncaisson': 1, 
-                                  'directembedment': 1, 
-                                  'drag': 1},
-                     'deep': {'shallowfoundation': 1, 
-                              'gravity': 1, 
-                              'pile': 1, 
-                              'suctioncaisson': 1, 
-                              'directembedment': 1, 
-                              'drag': 1}}
-            self.foundloaddirdict = {'down': {'shallowfoundation': 1, 
+                                             'pile': 1, 
+                                             'suctioncaisson': 2, 
+                                             'directembedment': 88, 
+                                             'drag': 2},
+                                 'moderate': {'shallowfoundation': 1, 
                                               'gravity': 1, 
                                               'pile': 1, 
                                               'suctioncaisson': 1, 
-                                              'directembedment': 88, 
-                                              'drag': 2},
-                     'uni': {'shallowfoundation': 1, 
-                             'gravity': 1, 
-                             'pile': 1, 
-                             'suctioncaisson': 1, 
-                             'directembedment': 1, 
-                             'drag': 1},
-                     'up': {'shallowfoundation': 1, 
-                            'gravity': 1, 
-                            'pile': 1, 
-                            'suctioncaisson': 1, 
-                            'directembedment': 1, 
-                            'drag': 2}}
-            self.foundloadmagdict = {'low': {'shallowfoundation': 1, 
-                                             'gravity': 1, 
-                                             'pile': 2, 
-                                             'suctioncaisson': 2, 
-                                             'directembedment': 1, 
-                                             'drag': 1},
-                     'moderate': {'shallowfoundation': 2, 
-                                  'gravity': 2, 
-                                  'pile': 1, 
-                                  'suctioncaisson': 1, 
-                                  'directembedment': 2, 
-                                  'drag': 1},
-                     'high': {'shallowfoundation': 88, 
-                              'gravity': 2, #This is to be discussed. HMGE says that gravity foundations don't work well for large loads
-                              'pile': 1, 
-                              'suctioncaisson': 1, 
-                              'directembedment': 88, 
-                              'drag': 88}}  
+                                              'directembedment': 1, 
+                                              'drag': 1},
+                                 'deep': {'shallowfoundation': 1, 
+                                          'gravity': 1, 
+                                          'pile': 1, 
+                                          'suctioncaisson': 1, 
+                                          'directembedment': 1, 
+                                          'drag': 1}}
+        self.foundloaddirdict = {'down': {'shallowfoundation': 1, 
+                                          'gravity': 1, 
+                                          'pile': 1, 
+                                          'suctioncaisson': 1, 
+                                          'directembedment': 88, 
+                                          'drag': 2},
+                                 'uni': {'shallowfoundation': 1, 
+                                         'gravity': 1, 
+                                         'pile': 1, 
+                                         'suctioncaisson': 1, 
+                                         'directembedment': 1, 
+                                         'drag': 1},
+                                 'up': {'shallowfoundation': 1, 
+                                        'gravity': 1, 
+                                        'pile': 1, 
+                                        'suctioncaisson': 1, 
+                                        'directembedment': 1, 
+                                        'drag': 2}}
+        self.foundloadmagdict = {'low': {'shallowfoundation': 1, 
+                                         'gravity': 1, 
+                                         'pile': 2, 
+                                         'suctioncaisson': 2, 
+                                         'directembedment': 1, 
+                                         'drag': 1},
+                                 'moderate': {'shallowfoundation': 2, 
+                                              'gravity': 2, 
+                                              'pile': 1, 
+                                              'suctioncaisson': 1, 
+                                              'directembedment': 2, 
+                                              'drag': 1},
+                                 'high': {'shallowfoundation': 88, 
+                                          'gravity': 2, #This is to be discussed. HMGE says that gravity foundations don't work well for large loads
+                                          'pile': 1, 
+                                          'suctioncaisson': 1, 
+                                          'directembedment': 88, 
+                                          'drag': 88}}  
+        
+        for j in range(0,self.quanfound): 
             
-            for j in range(0,self.quanfound): 
+            if self.soildep[j] == 0.0:
+                self.soildepk = 'none'
+            elif self.soildep[j] > 0.0 and self.soildep[j] <= 1.0:
+                self.soildepk = 'veryshallow'
+            elif self.soildep[j] > 1.0 and self.soildep[j] <= 6.0:
+                self.soildepk = 'shallow'
+            elif self.soildep[j] > 6.0 and self.soildep[j] <= 25.0:
+                self.soildepk = 'moderate'
+            elif self.soildep[j] > 25.0 or math.isinf(self.soildep[j]):
+                self.soildepk = 'deep'
+            if (self.soildep[j] == 'shallow' 
+                and self.soiltyp[j] in ('vsc','sc') 
+                and systype in ("wavefloat","tidefloat")):
+                self.foundsoildepdict.get('shallow')['drag'] = 88
+            elif (self.soildep[j] == 'moderate' 
+                and self.soiltyp[j] in ('vsc','sc') 
+                and systype in ("wavefloat","tidefloat")):
+                self.foundsoildepdict.get('shallow')['drag'] = 2    
+            if self.loadmag[j] < 444.8e3:
+                self.loadmagk = 'low'
+            elif self.loadmag[j] >= 444.8e3 and self.loadmag[j] <= 4448.2e3:
+                self.loadmagk = 'moderate'
+            elif self.loadmag[j] > 4448.2e3 :
+                self.loadmagk = 'high' 
+            if self.loaddir[j] == 1.0:
+                self.loaddirk = 'up'
+            elif self.loaddir[j] == -1.0:
+                self.loaddirk = 'down'
+            elif self.loaddir[j] == 0.0:
+                self.loaddirk = 'uni'
+            
+            for stkey in self.foundsoiltypdict:
+                self.foundsoiltyp = self.foundsoiltypdict.get(
+                                                        self.soiltyp[j])          
+            for slkey in self.foundslopedict:
+                self.foundslp = self.foundslopedict.get(self.seabedslpk)  
+            for sdkey in self.foundsoildepdict:
+                self.founddep = self.foundsoildepdict.get(self.soildepk)   
+            for ldkey in self.foundloaddirdict:
+                self.foundloaddir = self.foundloaddirdict.get(
+                                                    self.loaddirk) 
+            for lmkey in self.foundloadmagdict:
+                self.foundloadmag = self.foundloadmagdict.get(
+                                                    self.loadmagk)  
+            
+            self.foundmatrixsum = map(sum, zip(self.foundsoiltyp.values(),
+                self.foundslp.values(), self.founddep.values(),
+                self.foundloaddir.values(),self.foundloadmag.values()))
+            self.foundmatsumdict = dict(zip(self.foundtyps, 
+                                            self.foundmatrixsum))  
+            
+            self.unsuitftyps = []
+            
+            # Remove unsuitable foundations with scores above maximum 
+            # permissible limit of 10 unless its the preferred foundation
+            for posftyps in self.foundmatsumdict: 
                 
-                if self.soildep[j] == 0.0:
-                    self.soildepk = 'none'
-                elif self.soildep[j] > 0.0 and self.soildep[j] <= 1.0:
-                    self.soildepk = 'veryshallow'
-                elif self.soildep[j] > 1.0 and self.soildep[j] <= 6.0:
-                    self.soildepk = 'shallow'
-                elif self.soildep[j] > 6.0 and self.soildep[j] <= 25.0:
-                    self.soildepk = 'moderate'
-                elif self.soildep[j] > 25.0 or math.isinf(self.soildep[j]):
-                    self.soildepk = 'deep'
-                if (self.soildep[j] == 'shallow' 
-                    and self.soiltyp[j] in ('vsc','sc') 
-                    and systype in ("wavefloat","tidefloat")):
-                    self.foundsoildepdict.get('shallow')['drag'] = 88
-                elif (self.soildep[j] == 'moderate' 
-                    and self.soiltyp[j] in ('vsc','sc') 
-                    and systype in ("wavefloat","tidefloat")):
-                    self.foundsoildepdict.get('shallow')['drag'] = 2    
-                if self.loadmag[j] < 444.8e3:
-                    self.loadmagk = 'low'
-                elif self.loadmag[j] >= 444.8e3 and self.loadmag[j] <= 4448.2e3:
-                    self.loadmagk = 'moderate'
-                elif self.loadmag[j] > 4448.2e3 :
-                    self.loadmagk = 'high' 
-                if self.loaddir[j] == 1.0:
-                    self.loaddirk = 'up'
-                elif self.loaddir[j] == -1.0:
-                    self.loaddirk = 'down'
-                elif self.loaddir[j] == 0.0:
-                    self.loaddirk = 'uni'
+                if self.prefound is not None and posftyps == self.prefound:
+                    continue
                 
-                for stkey in self.foundsoiltypdict:
-                    self.foundsoiltyp = self.foundsoiltypdict.get(
-                                                            self.soiltyp[j])          
-                for slkey in self.foundslopedict:
-                    self.foundslp = self.foundslopedict.get(self.seabedslpk)  
-                for sdkey in self.foundsoildepdict:
-                    self.founddep = self.foundsoildepdict.get(self.soildepk)   
-                for ldkey in self.foundloaddirdict:
-                    self.foundloaddir = self.foundloaddirdict.get(
-                                                        self.loaddirk) 
-                for lmkey in self.foundloadmagdict:
-                    self.foundloadmag = self.foundloadmagdict.get(
-                                                        self.loadmagk)  
+                if self.foundmatsumdict[posftyps] > 10.0:
+                    self.unsuitftyps.append(posftyps)
+            
+            for unsuitftyps in self.unsuitftyps:      
+                del self.foundmatsumdict[unsuitftyps]
+            
+            self.ancs = {'drag', 'directembedment', 'suctioncaisson'}   
+            
+            """ Use mooring system loads if system is floating and exclude 
+                anchors if system is fixed """            
+            if systype in ("wavefixed","tidefixed"):
+                for akey in self.ancs:  
+                    if akey in self.foundmatsumdict:
+                        del self.foundmatsumdict[akey]   
+            """ Sort selected solutions if required. Note: ranking is 
+                currently not used """
+            self.possfoundtyp[j] = sorted(self.foundmatsumdict.items(), 
+                                            key=operator.itemgetter(1))
+            
+        return
                 
-                self.foundmatrixsum = map(sum, zip(self.foundsoiltyp.values(),
-                    self.foundslp.values(), self.founddep.values(),
-                    self.foundloaddir.values(),self.foundloadmag.values()))
-                self.foundmatsumdict = dict(zip(self.foundtyps, 
-                                                self.foundmatrixsum))  
-                
-                self.unsuitftyps = []
-                for posftyps in self.foundmatsumdict: 
-                    """ Remove unsuitable foundations with scores above maximum 
-                        permissible limit of 10 """
-                    if self.foundmatsumdict[posftyps] > 10.0:
-                        self.unsuitftyps.append(posftyps)
-                for unsuitftyps in self.unsuitftyps:      
-                    del self.foundmatsumdict[unsuitftyps]
-                self.ancs = {'drag', 'directembedment', 'suctioncaisson'}   
-                
-                """ Use mooring system loads if system is floating and exclude 
-                    anchors if system is fixed """            
-                if systype in ("wavefixed","tidefixed"):
-                    for akey in self.ancs:  
-                        if akey in self.foundmatsumdict:
-                            del self.foundmatsumdict[akey]   
-                """ Sort selected solutions if required. Note: ranking is 
-                    currently not used """
-                self.possfoundtyp[j] = sorted(self.foundmatsumdict.items(), 
-                                                key=operator.itemgetter(1))             
     def founddes(self,systype):      
         """Foundation design """                
         self.foundvolsteeldict = [{} for row in range(self.quanfound)]
@@ -3754,26 +3778,54 @@ class Found(Moor, Loads):
                                                 self.seldraganc[j]]['item11']
                     self.totfoundcostdict[posftyps[0]] = self.anccost
                   
-        for j in range(0,self.quanfound):            
+        for j in range(0,self.quanfound):
+            
             if self.possfoundtyp[j]:
+                
                 for posftyps in self.possfoundtyp[j]:
-                    if self.possfoundtyp[j] != 0:                    
-                        if (self.foundnotreqflag[posftyps[0]][j] == 'False' 
-                            and self.foundnotfoundflag[posftyps[0]][j] == 'False'):                            
-                            if (self.totfoundcostdict[posftyps[0]][j]
-                                < self.sorttotfoundcost[j][1]):
-                                self.sorttotfoundcost[j] = (posftyps[0], 
-                                                    self.totfoundcostdict[posftyps[0]][j])  
-                            """ Select lowest capital cost solution which is suitable """        
-                            self.selfoundtyp[j] = self.sorttotfoundcost[j]
-                        else:
-                            if (self.foundnotreqflag[posftyps[0]][j] == 'True' 
-                                and self._variables.systype in ('wavefixed', 'tidefixed')):
-                                self.selfoundtyp[j] = ('Foundation not required', 0)    
-            else:
-                self.selfoundtyp[j] = ('Foundation solution not found', 0)
+                                        
+                    if self.possfoundtyp[j] != 0:
+                        
+                        if (self.foundnotreqflag[posftyps[0]][j] == 'False' and
+                            self.foundnotfoundflag[posftyps[0]][j] == 'False'):
+                            
+                            if (self.prefound is not None and
+                                posftyps[0] == self.prefound):
                                 
-                  
+                                self.sorttotfoundcost[j] = (
+                                        posftyps[0], 
+                                        self.totfoundcostdict[posftyps[0]][j])
+                                
+                                self.selfoundtyp[j] = self.sorttotfoundcost[j]
+                                
+                                break
+                            
+                            elif (self.totfoundcostdict[posftyps[0]][j]
+                                                < self.sorttotfoundcost[j][1]):
+                                
+                                self.sorttotfoundcost[j] = (
+                                        posftyps[0], 
+                                        self.totfoundcostdict[posftyps[0]][j])
+                                
+                            # Select lowest capital cost solution which is
+                            # suitable   
+                            self.selfoundtyp[j] = self.sorttotfoundcost[j]
+                            
+                        elif (self._variables.systype in ('wavefixed',
+                                                          'tidefixed') and 
+                              self.foundnotreqflag[posftyps[0]][j] == 'True'):
+                                    
+                                self.selfoundtyp[j] = \
+                                                ('Foundation not required', 0) 
+                                                
+                                if (self.prefound is not None and
+                                    posftyps[0] == self.prefound): break
+            
+            else:
+                
+                self.selfoundtyp[j] = ('Foundation solution not found', 0)
+              
+        return
 
     def foundbom(self, deviceid):        
         """ Create foundation system bill of materials for the RAM and logistic functions """             
