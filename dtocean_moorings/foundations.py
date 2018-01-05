@@ -3856,7 +3856,7 @@ class Found(Moor, Loads):
         logmsg.append('self.selfoundtyp {}'.format(self.selfoundtyp))            
         module_logger.debug(" ".join(logmsg))
         for j in range(0, self.quanfound):            
-            if (self.selfoundtyp[j][0] not in ('Foundation not required', 'Foundation solution not found')):
+            if self.selfoundtyp[j][0] != 'Foundation solution not found': #not in ('Foundation not required', 'Foundation solution not found'):
                 if self.selfoundtyp[j][0] == 'pile':
                     self.listfoundcomp.append(self.piledim[j][4])
                     if self.selfoundgrouttypdict[j][self.selfoundtyp[j][0]] == 'n/a':
@@ -3873,14 +3873,30 @@ class Found(Moor, Loads):
                 self.listfoundcomp.append(self.selfoundtyp[j][0])
                 
         self.quanfoundcomp = Counter(self.listfoundcomp)
+        
         for j in range(0, self.quanfound):
-            listuniqfoundcomp = []
-            complabel = self.selfoundtyp[j][0] 
-            if (self.selfoundtyp[j][0] not in ('Foundation not required', 'Foundation solution not found')):    
-                """ Create RAM BOM """                
+            listuniqfoundcomp = []            
+            if self.selfoundtyp[j][0] != 'Foundation solution not found': #not in ('Foundation not required', 'Foundation solution not found'):    
+                # Create markers              
                 self.uniqfoundcomp[j] = '{0:04}'.format(self.netuniqcompind)
                 self.netuniqcompind = self.netuniqcompind + 1  
-                devind = int(float(deviceid[-3:]))                
+                listuniqfoundcomp.append(self.netuniqcompind)               
+                
+                self.netlistuniqfoundcomp[j] = self.uniqfoundcomp[j]
+                if self.selfoundtyp[j][0] == 'pile':
+                    foundmarkerlist[j] = [int(self.netlistuniqfoundcomp[j][-4:]),int(self.netlistuniqfoundcomp[j][-4:])+1]
+                    self.netuniqcompind = self.netuniqcompind + 1      
+                else:
+                    foundmarkerlist[j] = [int(self.netlistuniqfoundcomp[j][-4:])]
+            else:
+                self.uniqfoundcomp[j] = 'n/a'
+                self.netlistuniqfoundcomp[j] = []
+                foundmarkerlist[j] = []
+            
+            
+            if self.selfoundtyp[j][0] not in ('Foundation not required',
+                                              'Foundation solution not found'):    
+                # Create RAM BOM              
                 if self.selfoundtyp[j][0] == 'drag': 
                     compid = self.seldraganc[j]
                 elif self.selfoundtyp[j][0] == 'pile':
@@ -3893,22 +3909,12 @@ class Found(Moor, Loads):
                                           1.0,
                                           self.sorttotfoundcost[j][1],
                                           self.projectyear]
-                listuniqfoundcomp.append(self.netuniqcompind)               
                 
-                self.netlistuniqfoundcomp[j] = self.uniqfoundcomp[j]
-                if self.selfoundtyp[j][0] == 'pile':
-                    foundmarkerlist[j] = [int(self.netlistuniqfoundcomp[j][-4:]),int(self.netlistuniqfoundcomp[j][-4:])+1]
-                    self.netuniqcompind = self.netuniqcompind + 1      
-                else:
-                    foundmarkerlist[j] = [int(self.netlistuniqfoundcomp[j][-4:])]
             else:
-                self.uniqfoundcomp[j] = 'n/a'
                 self.foundecoparams[j] = ['n/a',
                                           'n/a',
                                           0.0,
                                           'n/a']
-                self.netlistuniqfoundcomp[j] = []
-                foundmarkerlist[j] = []
             
         self.foundrambomdict['marker'] = foundmarkerlist
         self.foundrambomdict['quantity'] = self.quanfoundcomp
@@ -3956,7 +3962,23 @@ class Found(Moor, Loads):
                 devind = int(float(deviceid[-3:]))
                 tabind.append(j + (devind - 1) * self.quanfound)
             elif systype == 'substation':
-                tabind.append(len(self.sysfoundinsttab.index))            
+                tabind.append(len(self.sysfoundinsttab.index))
+                
+            laylst = []
+            
+            for layer in range(0,(len(self._variables.soiltypgrid[0]) - 2) / 2):
+                laylst.append((layer, self.soiltyp[j], self.soildep[j]))
+            self.layerlist[j] = laylst      
+            
+            if deviceid[0:6] == 'device':
+                foundposglob[j][0] =  self.foundlocglob[j][0] + sysorig[deviceid][0]
+                foundposglob[j][1] =  self.foundlocglob[j][1] + sysorig[deviceid][1]
+                foundposglob[j][2] =  self.foundlocglob[j][2]
+            else:
+                foundposglob[j][0] =  self.foundlocglob[j][0] + sysorig[0]
+                foundposglob[j][1] =  self.foundlocglob[j][1] + sysorig[1]
+                foundposglob[j][2] =  self.foundlocglob[j][2]
+                
             if self.selfoundtyp[j][0] == 'Foundation not required':
                 self.foundinstparams[j] = [deviceid, 
                     'foundation' + '{0:03}'.format(self.foundnum), 
@@ -3994,10 +4016,6 @@ class Found(Moor, Loads):
                     'n/a']
                 
             else:
-                laylst = []
-                for layer in range(0,(len(self._variables.soiltypgrid[0]) - 2) / 2):
-                    laylst.append((layer, self.soiltyp[j], self.soildep[j]))
-                self.layerlist[j] = laylst                
                 
                 if self.selfoundtyp[j][0] == 'drag':
                     self.foundinstdep[j] = self.ancpendep[j] 
@@ -4044,14 +4062,7 @@ class Found(Moor, Loads):
                                             -sysorienang * math.pi / 180.0), foundloc[j][2]]
                 else: 
                     self.foundlocglob[j] = foundloc[j]
-                if deviceid[0:6] == 'device':
-                    foundposglob[j][0] =  self.foundlocglob[j][0] + sysorig[deviceid][0]
-                    foundposglob[j][1] =  self.foundlocglob[j][1] + sysorig[deviceid][1]
-                    foundposglob[j][2] =  self.foundlocglob[j][2]
-                else:
-                    foundposglob[j][0] =  self.foundlocglob[j][0] + sysorig[0]
-                    foundposglob[j][1] =  self.foundlocglob[j][1] + sysorig[1]
-                    foundposglob[j][2] =  self.foundlocglob[j][2] 
+
                 if self.selfoundtyp[j][0] in ('pile', 'suctioncaisson'):
                     self.foundinstparams[j] = [deviceid, 
                          'foundation' + '{0:03}'.format(self.foundnum), 
@@ -4087,10 +4098,17 @@ class Found(Moor, Loads):
                     self.selfoundgrouttypdict[j][self.selfoundtyp[j][0]], 
                     self.foundvolgroutdict[j][self.selfoundtyp[j][0]]] 
             self.foundnum = self.foundnum + 1
-        if (self.founduniformflag == 'True' and systype in ("wavefloat", "tidefloat","wavefixed","tidefixed")):
+        
+        active_founds = set([x[0] for x in self.selfoundtyp
+                                     if x[0] != 'Foundation not required'])
+        
+        if (self.founduniformflag == 'True' and len(active_founds) == 1):
             """ Each device to have the same size/weight foundation (largest) """
             self.fwmaxinddev = self.foundweight.index(max(
                                         self.foundweight))
+            
+            self.foundinstparams = [0 for row in range(self.quanfound)]
+            self.foundecoparams = [0 for row in range(0,self.quanfound)]
             
             """ Update installation parameters, RAM hierarchy, RAM bill of materials and economics tables"""
             for j in range(0,self.quanfound): 
@@ -4141,7 +4159,11 @@ class Found(Moor, Loads):
                         self.listfoundcomp.append(self.selfoundgrouttypdict[self.fwmaxinddev][self.selfoundtyp[self.fwmaxinddev][0]])
                 elif self.selfoundtyp[self.fwmaxinddev][0] == 'suctioncaisson':
                     self.listfoundcomp.append(self.caissdim[self.fwmaxinddev][3])
-                else: self.listfoundcomp.append(self.selfoundtyp[self.fwmaxinddev][0])
+                elif self.selfoundtyp[self.fwmaxinddev][0] == 'drag':
+                    self.listfoundcomp.append(self.seldraganc[self.fwmaxinddev])
+                else:
+                    self.listfoundcomp.append(self.selfoundtyp[self.fwmaxinddev][0])
+                    
                 self.quanfoundcomp = Counter(self.listfoundcomp)
                 self.foundrambomdict['quantity'] = self.quanfoundcomp
                 
@@ -4157,13 +4179,14 @@ class Found(Moor, Loads):
                 self.foundecoparams[j] = [compid, 
                                           1.0,
                                           self.sorttotfoundcost[self.fwmaxinddev][1],
-                                          self.projectyear]  
-                self.foundecobomtab = pd.DataFrame(self.foundecoparams, 
-                                                   index=tabind, 
-                                                   columns=['compid [-]', 
-                                                            'quantity [-]',
-                                                            'component cost [euros] [-]',
-                                                            'project year']) 
+                                          self.projectyear]
+                
+            self.foundecobomtab = pd.DataFrame(self.foundecoparams, 
+                                               index=tabind, 
+                                               columns=['compid [-]', 
+                                                        'quantity [-]',
+                                                        'component cost [euros] [-]',
+                                                        'project year']) 
         
         self.foundinsttab = pd.DataFrame(self.foundinstparams, 
                                          index=tabind, 
