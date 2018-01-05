@@ -674,40 +674,6 @@ class Main(Found, Subst):
                             self.sysfoundecobomtab], axis=0, ignore_index=True)
         elif self._variables.systype in ("wavefixed","tidefixed"):    
             self.sysecobom = self.sysfoundecobomtab
-                
-        if self._variables.prefound and self._variables.prefound[0:6] == 'uniary':
-            """ Uniform foundations across array. Determine largest weight """
-            fwarray = self.sysfoundinsttab['dry mass [kg]'].tolist()
-            fwmaxindaryind = fwarray.index(max(fwarray))
-            fwmaxdev = self.sysfoundinsttab.ix[fwmaxindaryind, 'devices [-]']
-            
-            """ Update installation parameters, RAM hierarchy, RAM bill of materials and economics tables"""
-            for rowind in self.sysfoundinsttab.index:
-                self.sysfoundinsttab.ix[rowind,'length [m]'] = self.sysfoundinsttab.ix[fwmaxindaryind,'length [m]']
-                self.sysfoundinsttab.ix[rowind,'width [m]'] = self.sysfoundinsttab.ix[fwmaxindaryind,'width [m]']
-                self.sysfoundinsttab.ix[rowind,'height [m]'] = self.sysfoundinsttab.ix[fwmaxindaryind,'height [m]']
-                self.sysfoundinsttab.ix[rowind,'installation depth [m]'] = self.sysfoundinsttab.ix[fwmaxindaryind,'installation depth [m]']
-                self.sysfoundinsttab.ix[rowind,'dry mass [kg]'] = self.sysfoundinsttab.ix[fwmaxindaryind,'dry mass [kg]']  
-                self.sysfoundinsttab.ix[rowind,'grout type [-]'] = self.sysfoundinsttab.ix[fwmaxindaryind,'grout type [-]']  
-                self.sysfoundinsttab.ix[rowind,'grout volume [m3]'] = self.sysfoundinsttab.ix[fwmaxindaryind,'grout volume [m3]']  
-            for deviceid in self._variables.devices:
-                self.sysrambom[deviceid]['Foundation']['quantity'] = self.sysrambom[fwmaxdev]['Foundation']['quantity']
-                self.syshier[deviceid]['Foundation'] = self.syshier[fwmaxdev]['Foundation']
-            for rowind in self.sysecobom.index:
-                """ Search for compid and cost """
-                if (self.sysecobom.ix[rowind,'devices [-]'] == fwmaxdev
-                    and self.sysecobom.ix[rowind,'logistics id [-]'][:-4] == self._variables.prefound[6:]):
-                    # logmsg = [""]
-                    # logmsg.append('rowind {}'.format(rowind ))
-                    # module_logger.info("\n".join(logmsg)) 
-                    fwmaxcompid = self.sysecobom.ix[rowind,'compid [-]']
-                    fwmaxcost = self.sysecobom.ix[rowind,'component cost [euros]']
-            for rowind in self.sysecobom.index:
-                """ Update compid and cost """
-                if (self.sysecobom.ix[rowind,'devices [-]'][0:6] == 'device'
-                    and self.sysecobom.ix[rowind,'logistics id [-]'][:-4] == self._variables.prefound[6:]):
-                    self.sysecobom.ix[rowind,'compid [-]'] = fwmaxcompid
-                    self.sysecobom.ix[rowind,'component cost [euros]'] = fwmaxcost
         
         # Check for None
         if self._variables.substparams is None:
