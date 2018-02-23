@@ -411,7 +411,7 @@ class Loads(object):
             self.thrustcoefint = interpolate.interp1d(
                             self._variables.thrustcurv[:,0], 
                             self._variables.thrustcurv[:,1],
-                            bounds_error=False) 
+                            fill_value="extrapolate") 
             if (self.currentvelhub 
                 >= min(self._variables.thrustcurv[:,0]) 
                 and self.currentvelhub
@@ -494,7 +494,7 @@ class Loads(object):
                                     self._variables.dragcoefcyl[0,:])+1], 
                                     self._variables.dragcoefcyl[-1,1:len(
                                     self._variables.dragcoefcyl[0,:])+1],
-                                    bounds_error=False) 
+                                    fill_value="extrapolate") 
                                 self.winddragcoef[0] = self.winddragcoefint(
                                     ndsysrough)
                                 self.winddragcoef[1] = self.winddragcoef[0]
@@ -505,7 +505,7 @@ class Loads(object):
                                     self._variables.dragcoefcyl[0,:])+1], 
                                     self._variables.dragcoefcyl[1,1:len(
                                     self._variables.dragcoefcyl[0,:])+1],
-                                    bounds_error=False) 
+                                    fill_value="extrapolate") 
                                 self.winddragcoef[0] = self.winddragcoefint(
                                     ndsysrough)
                                 self.winddragcoef[1] = self.winddragcoef[0]
@@ -592,24 +592,24 @@ class Loads(object):
                 """ Drag coefficients from DNV-RP-C205. Note: for Re ~ 5e4 """                
                 """ Use end points for out of range values """
                 if self.currentrn > self._variables.dragcoefcyl[-1,0]:
-                    self.currentdragcoefint = (interpolate.interp1d(
+                    self.currentdragcoefint = interpolate.interp1d(
                         self._variables.dragcoefcyl[0,1:len(
                         self._variables.dragcoefcyl[0,:])+1], 
                         self._variables.dragcoefcyl[-1,1:len(
                         self._variables.dragcoefcyl[0,:])+1],
-                        bounds_error=False))
+                        fill_value="extrapolate")
                     self.currentdragcoefintp = self.currentdragcoefint(
                                             ndsysrough)
                     self.currentdragcoef[0] = self.currentdragcoefintp
                     self.currentdragcoef[1] = self.currentdragcoefintp
                     module_logger.warn('WARNING: Reynolds number out of range for drag coefficient data')
                 elif self.currentrn < self._variables.dragcoefcyl[1,0]:
-                    self.currentdragcoefint = (interpolate.interp1d(
+                    self.currentdragcoefint = interpolate.interp1d(
                         self._variables.dragcoefcyl[0,1:len(
                         self._variables.dragcoefcyl[0,:])+1], 
                         self._variables.dragcoefcyl[1,1:len(
                         self._variables.dragcoefcyl[0,:])+1],
-                        bounds_error=False))
+                        fill_value="extrapolate")
                     self.currentdragcoefintp = self.currentdragcoefint(
                                             ndsysrough)
                     self.currentdragcoef[0] = self.currentdragcoefintp
@@ -626,7 +626,7 @@ class Loads(object):
                 self.currentdragcoefint = interpolate.interp1d(
                         self._variables.currentdragcoefrect[:,0], 
                         self._variables.currentdragcoefrect[:,1],
-                        bounds_error=False)                
+                        fill_value="extrapolate")              
                 if (self.wlratio ** -1.0 <= self._variables.currentdragcoefrect[0,0]
                     and self.wlratio ** -1.0 >= self._variables.currentdragcoefrect[-1,0]):
                     self.currentdragcoef[0] = self.currentdragcoefint(
@@ -790,7 +790,7 @@ class Loads(object):
                         self.refleccoefint = interpolate.interp1d(
                             self._variables.driftcoeffloatrect[:,0], 
                             self._variables.driftcoeffloatrect[:,1],
-                            bounds_error=False) 
+                            fill_value="extrapolate") 
                         if (self.omegawave[tpind] 
                             >= min(self._variables.driftcoeffloatrect[:,0]) 
                             and self.omegawave[tpind]
@@ -1052,21 +1052,19 @@ class Loads(object):
                                                                  fexdirsnew[neardirinds],
                                                                  [fexraovaluesnew[mode][neardirinds[0]][nearfreqinds],
                                                                   fexraovaluesnew[mode][neardirinds[1]][nearfreqinds]],
-                                                                 bounds_error=False)
+                                                                 fill_value="extrapolate")
                                 fexrao[tpind][mode] = fexraoint(wavefreqs[tpind], self.waveangattk[tpind])
                             else: 
                                 if (len(nearfreqinds) == 1 and len(neardirinds) > 1):
                                     fexraoint = interpolate.interp1d(fexdirsnew[neardirinds],
                                                                      [fexraovaluesnew[mode][neardirinds[0]][nearfreqinds[0]],
                                                                       fexraovaluesnew[mode][neardirinds[1]][nearfreqinds[0]]],
-                                                                     bounds_error=False,
                                                                      fill_value="extrapolate")                                                                   
                                     fexrao[tpind][mode] = fexraoint(self.waveangattk[tpind])
                                 elif (len(nearfreqinds) > 1 and len(neardirinds) == 1):
                                     fexraoint = interpolate.interp1d(fexfreqs[nearfreqinds],
                                                                      [fexraovaluesnew[mode][neardirinds[0]][nearfreqinds[0]],
                                                                       fexraovaluesnew[mode][neardirinds[0]][nearfreqinds[1]]],
-                                                                     bounds_error=False,
                                                                      fill_value="extrapolate")
                                     fexrao[tpind][mode] = fexraoint(wavefreqs[tpind])
                         elif fexmodes[mode] == 0:
@@ -1545,7 +1543,7 @@ class Loads(object):
                                                     self._variables.dragcoefcyl[0,:])+1], 
                                                     self._variables.dragcoefcyl[-1,1:len(
                                                     self._variables.dragcoefcyl[0,:])+1],
-                                                    bounds_error=False) 
+                                                    fill_value="extrapolate") 
                                                 self.wavedragcoefsteady[mode] = self.wavedragcoefint(
                                                     ndsysrough)
                                                 module_logger.warn('WARNING: Reynolds number out of range for drag coefficient data')
@@ -1556,7 +1554,7 @@ class Loads(object):
                                                     self._variables.dragcoefcyl[0,:])+1], 
                                                     self._variables.dragcoefcyl[1,1:len(
                                                     self._variables.dragcoefcyl[0,:])+1],
-                                                    bounds_error=False) 
+                                                    fill_value="extrapolate") 
                                                 self.wavedragcoefsteady[mode] = self.wavedragcoefint(
                                                     ndsysrough)
                                                 module_logger.warn('WARNING: Reynolds number out of range for drag coefficient data')
@@ -1607,7 +1605,7 @@ class Loads(object):
                                         self.wavedragcoefint = interpolate.interp1d(
                                             self._variables.currentdragcoefrect[:,0], 
                                             self._variables.currentdragcoefrect[:,1],
-                                            bounds_error=False)
+                                            fill_value="extrapolate")
                                         if (self.wlratio ** -1.0 <= self._variables.currentdragcoefrect[0,0]
                                             and self.wlratio ** -1.0 >= self._variables.currentdragcoefrect[-1,0]):                                        
                                                 self.wavedragcoefsteady[0] = self.wavedragcoefint(
@@ -1642,7 +1640,7 @@ class Loads(object):
                                         self.waveinertiacoefint = interpolate.interp1d(
                                             self._variables.waveinertiacoefrect[:,0], 
                                             self._variables.waveinertiacoefrect[:,1],
-                                            bounds_error=False)
+                                            fill_value="extrapolate")
                                         if (self.wlratio ** -1.0 <= self._variables.waveinertiacoefrect[0,0]
                                             and self.wlratio ** -1.0 >= self._variables.waveinertiacoefrect[-1,0]):
                                                 self.waveinertiacoef[0] = self.wavedragcoefint(
