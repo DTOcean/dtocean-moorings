@@ -1318,7 +1318,7 @@ class Found(Moor, Loads):
                     Meyerhoff and Adams 1968  """
                 linebcfnqint = interpolate.interp1d(self._variables.linebcf[:,0], 
                                                     self._variables.linebcf[:,1],
-                                                    bounds_error=False)
+                                                    fill_value="extrapolate")
                 linebcfnq = linebcfnqint(self.dsfangrad * 180.0 / math.pi)
                 """ Bearing resistance per unit length of chain """
                 bearres = linebcfnq * self.moorconnsize * self.soilweight * embeddepth 
@@ -2585,7 +2585,7 @@ class Found(Moor, Loads):
                                             k1coefint = interpolate.interp1d(
                                                 self._variables.k1coef[:,0], 
                                                 self._variables.k1coef[:,k1coefcol],
-                                                bounds_error=False)
+                                                fill_value="extrapolate")
                                             k1coef = k1coefint(100.0 * deflmax 
                                                     / piledia) 
                                             sgrcoef = (unshstrav * k1coef 
@@ -2628,11 +2628,11 @@ class Found(Moor, Loads):
                                         piledefcoefayint = interpolate.interp1d(
                                             self._variables.piledefcoef[:,0], 
                                             self._variables.piledefcoef[:,1],
-                                            bounds_error=False)
+                                            fill_value="extrapolate")
                                         piledefcoefbyint = interpolate.interp1d(
                                             self._variables.piledefcoef[:,0], 
                                             self._variables.piledefcoef[:,2],
-                                            bounds_error=False)
+                                            fill_value="extrapolate")
                                         piledefcoefay = piledefcoefayint(
                                                                 maxdepthcoef)
                                         piledefcoefby = piledefcoefbyint(
@@ -2697,7 +2697,7 @@ class Found(Moor, Loads):
                                     skinfricreslimint = interpolate.interp1d(
                                         self._variables.pilefricresnoncal[:,0], 
                                         self._variables.pilefricresnoncal[:,3],
-                                        bounds_error=False)
+                                        fill_value="extrapolate")
                                     skinfricreslim = skinfricreslimint(
                                         self.dsfangrad * 180.0 / math.pi)
                                     
@@ -2826,7 +2826,7 @@ class Found(Moor, Loads):
                                             bcflimint = interpolate.interp1d(
                                                 self._variables.pilefricresnoncal[:,0], 
                                                 self._variables.pilefricresnoncal[:,2],
-                                                bounds_error=False)
+                                                fill_value="extrapolate")
                                             bcflim = bcflimint(self.dsfangrad 
                                                 * 180.0 / math.pi)                                
                                             """ Unit soil bearing capacity 
@@ -2834,7 +2834,7 @@ class Found(Moor, Loads):
                                             soilbearcaplimint = interpolate.interp1d(
                                                 self._variables.pilefricresnoncal[:,0], 
                                                 self._variables.pilefricresnoncal[:,4],
-                                                bounds_error=False)
+                                                fill_value="extrapolate")
                                             soilbearcaplim = soilbearcaplimint(
                                                 self.dsfangrad * 180.0 
                                                 / math.pi)      
