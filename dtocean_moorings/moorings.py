@@ -1539,7 +1539,7 @@ class Moor(Umb, Loads):
                             # self.linelengbedref = copy.deepcopy(self.linelengbed)  
                     """ Final system positions relative to local device origin """        
                     finalsyspos[l+wc][0:2] = syspos[0:2]
-                    finalsyspos[l+wc][0] = sysdraft
+                    finalsyspos[l+wc][2] = sysdraft
                     if l >= 2:
                         logmsg = [""]
                         logmsg.append('_________________________________________________________________________') 

@@ -96,7 +96,7 @@ class Umb(object):
                                     * math.cos(-self._variables.sysorienang 
                                     * math.pi / 180.0), 3)                       
         if self._variables.systype in ("wavefloat","tidefloat"):
-            umbtopconn[2] = self.umbconpt[2] + syspos[2] - self._variables.sysdraft
+            umbtopconn[2] = self.umbconpt[2] - syspos[2]
             klim = 100
         elif self._variables.systype in ("wavefixed","tidefixed"):
             umbtopconn[2] = -self.umbconpt[2]
