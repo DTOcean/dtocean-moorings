@@ -1187,23 +1187,67 @@ class Moor(Umb, Loads):
                                 module_logger.info("\n".join(logmsg))
                                     
                                 break
-                        if (l >= 1 and m > 10 and (math.sqrt(syspos[0] ** 2.0 + syspos[1] ** 2.0) 
-                                        > math.sqrt(self.maxdisp[0] ** 2.0 
-                                        + self.maxdisp[1] ** 2.0)
-                                        or math.sqrt(syspos[0] ** 2.0 + syspos[1] ** 2.0)
-                                        > 0.5 * self.mindevdist
-                                        or syspos[2] > self.maxdisp[2])):
-                                """ A check is carried out to determine if the device position 
-                                    exceeds either i) the user-specified displacement limits or ii)
-                                    half the minimum distance between adjacent device positions """
+                            
+                        if l >= 1 and m > 10:
+                            
+                            sysdis = math.sqrt(syspos[0] ** 2.0 +
+                                                           syspos[1] ** 2.0)
+                            maxdis = math.sqrt(self.maxdisp[0] ** 2.0 +
+                                                       self.maxdisp[1] ** 2.0)
+                            
+                            if (sysdis > maxdis or
+                                syspos[2] > self.maxdisp[2]):
+                                
+                                # A check is carried out to determine if the 
+                                # device position exceeds either the
+                                # user-specified displacement limits
                                 logmsg = [""]
-                                logmsg.append('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-                                logmsg.append('Device displacement limit exceeded!')
+                                logmsg.append('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+                                              '!!!!!!!!!!!!!!!!!')
+                                logmsg.append('Device displacement limit '
+                                              'exceeded!')
                                 self.dispexceedflag = 'True'
-                                self.sysposfail = (limitstate, [syspos[0], syspos[1], sysdraft])
-                                self.initcondfail = [linexf, linezf, Hfline, Vfline]
-                                logmsg.append('System position at failure = {}'.format(self.sysposfail))
-                                logmsg.append('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')    
+                                self.sysposfail = (limitstate, [syspos[0],
+                                                                syspos[1],
+                                                                sysdraft])
+                                self.initcondfail = [linexf,
+                                                     linezf,
+                                                     Hfline,
+                                                     Vfline]
+                                logmsg.append('System position at failure = '
+                                              '{}'.format(self.sysposfail))
+                                logmsg.append('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+                                              '!!!!!!!!!!!!!!!!!!')    
+                                module_logger.info("\n".join(logmsg))
+                                self.moordesfail = 'True'
+                                break
+                            
+                            if sysdis > 0.5 * self.mindevdist:
+                                
+                                # A check is carried out to determine if the 
+                                # device position exceeds half the minimum
+                                # distance between adjacent device positions
+                                logmsg = [""]
+                                logmsg.append('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+                                              '!!!!!!!!!!!!!!!!!!')
+                                logmsg.append('Device displacement exceeds '
+                                              'minimum separation!')
+                                
+                                self.dispexceedflag = 'True'
+                                self.sysposfail = (limitstate, [syspos[0],
+                                                                syspos[1],
+                                                                sysdraft])
+                                self.initcondfail = [linexf,
+                                                     linezf,
+                                                     Hfline,
+                                                     Vfline]
+                                
+                                logmsg.append('System position at failure = '
+                                              '{}'.format(self.sysposfail))
+                                logmsg.append('Minimum separation = '
+                                              '{}'.format(self.mindevdist))
+                                logmsg.append('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+                                              '!!!!!!!!!!!!!!!!!!')    
                                 module_logger.info("\n".join(logmsg))
                                 self.moordesfail = 'True'
                                 break
