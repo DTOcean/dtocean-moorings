@@ -545,7 +545,16 @@ class Moor(Umb, Loads):
                             self.umbconpt[2] = self.umbconpt[2] - self._variables.wlevmax
                         elif l == 4:
                             self.umbconpt[2] = self.umbconpt[2] + self._variables.wlevmin
-                        HumbloadX, HumbloadY, Vumbload,  self.umbleng, umbcheck = self.umbdes(self.deviceid, syspos, wc, self.umbconpt,l) 
+                        
+                        (HumbloadX,
+                         HumbloadY,
+                         Vumbload,
+                         self.umbleng,
+                         umbcheck) = self.umbdes(self.deviceid,
+                                                 syspos,
+                                                 wc,
+                                                 self.umbconpt,
+                                                 l) 
                         
                     if l < 3:
                         HumbloadX = 0.0
@@ -1873,11 +1882,20 @@ class Moor(Umb, Loads):
            
                         self.numlines = len(self.foundloc)                        
                         "*******************************************************"    
-                        self.linetenuls, self.fairten, self.anctenuls, self.initcond, self.sysposuls, self.umbcheck = mooreqav(self.selmoortyp, self.numlines, 
-                                                 self.fairloc, 
-                                                 self.foundloc, 
-                                                 self.lineleng,  
-                                                 self.initcond, self.linesuls, self.llim, self.limitstate)
+                        (self.linetenuls,
+                         self.fairten,
+                         self.anctenuls,
+                         self.initcond,
+                         self.sysposuls,
+                         self.umbcheck) = mooreqav(self.selmoortyp,
+                                                   self.numlines, 
+                                                   self.fairloc, 
+                                                   self.foundloc, 
+                                                   self.lineleng,  
+                                                   self.initcond,
+                                                   self.linesuls,
+                                                   self.llim,
+                                                   self.limitstate)
                         "*******************************************************"  
                         logmsg = [""]
                         logmsg.append('ULS line tensions {}'.format(self.linetenuls))
@@ -2061,11 +2079,20 @@ class Moor(Umb, Loads):
                             self.llim = [3]
                                                                 
                         "*******************************************************"    
-                        self.linetenuls, self.fairten, self.anctenuls, self.initcond, self.sysposuls, self.umbcheck = mooreqav(self.selmoortyp, self.numlines, 
-                                             self.fairloc, 
-                                             self.foundloc, 
-                                             self.lineleng,
-                                             self.initcond, self.linesuls, self.llim, self.limitstate)
+                        (self.linetenuls,
+                         self.fairten,
+                         self.anctenuls,
+                         self.initcond,
+                         self.sysposuls,
+                         self.umbcheck) = mooreqav(self.selmoortyp,
+                                                   self.numlines, 
+                                                   self.fairloc, 
+                                                   self.foundloc, 
+                                                   self.lineleng,
+                                                   self.initcond,
+                                                   self.linesuls,
+                                                   self.llim,
+                                                   self.limitstate)
                         "*******************************************************" 
                         self.anctenmaguls = [0 for row in range(self.quanfound)]
                         for j in range(0,self.quanfound):
