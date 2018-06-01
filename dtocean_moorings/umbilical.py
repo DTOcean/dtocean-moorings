@@ -95,8 +95,8 @@ class Umb(object):
                                     + umbbotconnloc[1]
                                     * math.cos(-self._variables.sysorienang 
                                     * math.pi / 180.0), 3)                       
-        if self._variables.systype in ("wavefloat","tidefloat"):  
-            umbtopconn[2] = -(self.umbconpt[2] - (syspos[2] - self._variables.sysdraft))
+        if self._variables.systype in ("wavefloat","tidefloat"):
+            umbtopconn[2] = self.umbconpt[2] + syspos[2] - self._variables.sysdraft
             klim = 100
         elif self._variables.systype in ("wavefixed","tidefixed"):
             umbtopconn[2] = -self.umbconpt[2]
@@ -230,7 +230,7 @@ class Umb(object):
             zumb[0] = 0.0
             for m in range(0,mlim):           
                 if m >= 1:
-                    if math.fabs(errumbzf) > disttol * umbzf:                          
+                    if math.fabs(errumbzf) >= disttol * umbzf:                          
                         if (np.diff(zumb[k-2:k+1:2]) == 0.0 and np.diff(zumb[k-3:k:2]) == 0.0):
                             Tffactor = 0.0001
                         else:
@@ -242,7 +242,7 @@ class Umb(object):
                         Vumb[0] = math.sqrt(Tumb[0] ** 2.0 - Humb[0] ** 2.0)
                         thetaumb[0] = math.atan(Vumb[0] / Humb[0])
                 
-                    if math.fabs(errumbxf) > disttol * umbxf:
+                    if math.fabs(errumbxf) >= disttol * umbxf:
                         if (np.diff(xumb[k-2:k+1:2]) == 0.0 and np.diff(xumb[k-3:k:2]) == 0.0):
                             Hffactor = 0.005
                         else:
