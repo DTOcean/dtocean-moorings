@@ -1201,20 +1201,22 @@ class Moor(Umb, Loads):
                             
                             sysdis = math.sqrt(syspos[0] ** 2.0 +
                                                            syspos[1] ** 2.0)
-                            maxdis = math.sqrt(self.maxdisp[0] ** 2.0 +
-                                                       self.maxdisp[1] ** 2.0)
+                            maxdis = max(self.maxdisp[:2])
                             
-                            if (sysdis > maxdis or
-                                syspos[2] > self.maxdisp[2]):
-                                
-                                # A check is carried out to determine if the 
-                                # device position exceeds either the
-                                # user-specified displacement limits
+                            alstest = max(self.mindevdist - maxdis,
+                                          0.5 * self.mindevdist)
+                            
+                            # A check is carried out to determine if the device
+                            # vertical position exceeds the user-specified 
+                            # displacement limits for ULS and ALS tests
+                            if syspos[2] > self.maxdisp[2]:
+
                                 logmsg = [""]
                                 logmsg.append('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
                                               '!!!!!!!!!!!!!!!!!')
-                                logmsg.append('Device displacement limit '
-                                              'exceeded!')
+                                logmsg.append('Device vertical displacement '
+                                              'limit {} exceeded!'.format(
+                                                            self.maxdisp[2]))
                                 self.dispexceedflag = 'True'
                                 self.sysposfail = (limitstate, [syspos[0],
                                                                 syspos[1],
@@ -1231,16 +1233,46 @@ class Moor(Umb, Loads):
                                 self.moordesfail = 'True'
                                 break
                             
-                            if sysdis > 0.5 * self.mindevdist:
+                            # For ULS tests, ensure the device does not exceed
+                            # the given horizontal displacements
+                            if (limitstate == 'ULS' and
+                                (syspos[0] > self.maxdisp[0] or 
+                                 syspos[1] > self.maxdisp[1])):
                                 
-                                # A check is carried out to determine if the 
-                                # device position exceeds half the minimum
-                                # distance between adjacent device positions
+
+                                logmsg = [""]
+                                logmsg.append('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+                                              '!!!!!!!!!!!!!!!!!')
+                                logmsg.append('Device horizontal displacement '
+                                              'limit exceeded!')
+                                self.dispexceedflag = 'True'
+                                self.sysposfail = (limitstate, [syspos[0],
+                                                                syspos[1],
+                                                                sysdraft])
+                                self.initcondfail = [linexf,
+                                                     linezf,
+                                                     Hfline,
+                                                     Vfline]
+                                logmsg.append('System position at failure = '
+                                              '{}'.format(self.sysposfail))
+                                logmsg.append('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+                                              '!!!!!!!!!!!!!!!!!!')    
+                                module_logger.info("\n".join(logmsg))
+                                self.moordesfail = 'True'
+                                break
+                            
+                            # For the ALS test ensure that the device can not
+                            # foul the closest device if it were at its maximum
+                            # extension
+                            if (limitstate == 'ALS' and
+                                sysdis > alstest):
+                                
                                 logmsg = [""]
                                 logmsg.append('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
                                               '!!!!!!!!!!!!!!!!!!')
                                 logmsg.append('Device displacement exceeds '
-                                              'minimum separation!')
+                                              'minimum separation of '
+                                              '{}m!'.format(alstest))
                                 
                                 self.dispexceedflag = 'True'
                                 self.sysposfail = (limitstate, [syspos[0],
