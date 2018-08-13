@@ -42,5 +42,6 @@ def test_get_sliding_resistance_fail(mocker):
     slope = 0.3
     load = 100
     
-    with pytest.raises(RuntimeError):
-        test._get_sliding_resistance(slope, load)
+    result = test._get_sliding_resistance(slope, load)
+
+    assert not result
