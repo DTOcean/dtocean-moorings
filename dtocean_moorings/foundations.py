@@ -933,7 +933,7 @@ class Found(Moor, Loads):
                 + self.horzfoundloads[j][1] ** 2.0 
                 + self.vertfoundloads[j] ** 2.0)        
         
-    def foundsel(self,systype): 
+    def foundsel(self, systype): 
         """ Select suitable foundation types """
         
         self.possfoundtyp = [0 for row in range(self.quanfound)]
@@ -1134,11 +1134,11 @@ class Found(Moor, Loads):
                 self.soildepk = 'moderate'
             elif self.soildep[j] > 25.0 or math.isinf(self.soildep[j]):
                 self.soildepk = 'deep'
-            if (self.soildep[j] == 'shallow' 
+            if (self.soildepk == 'shallow' 
                 and self.soiltyp[j] in ('vsc','sc') 
                 and systype in ("wavefloat","tidefloat")):
                 self.foundsoildepdict.get('shallow')['drag'] = 88
-            elif (self.soildep[j] == 'moderate' 
+            elif (self.soildepk == 'moderate' 
                 and self.soiltyp[j] in ('vsc','sc') 
                 and systype in ("wavefloat","tidefloat")):
                 self.foundsoildepdict.get('shallow')['drag'] = 2    
