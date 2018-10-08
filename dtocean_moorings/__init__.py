@@ -1,5 +1,19 @@
-#!/usr/bin/python2.7
-# encoding: utf-8
+# -*- coding: utf-8 -*-
+
+#    Copyright (C) 2016 Sam Weller, Jon Hardwick, Mathew Topper
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
 from pkg_resources import get_distribution
@@ -9,7 +23,6 @@ from polite.configuration import Logger
 
 # credentials
 __version__ = get_distribution('dtocean-moorings').version
-__authors__ = ['DTOcean Developers']
 
 # Set default logging handler to avoid "No handler found" warnings.
 try:  # Python 2.7+
@@ -20,6 +33,7 @@ except ImportError:
             pass
 
 logging.getLogger(__name__).addHandler(NullHandler())
+
 
 def start_logging(level=None):
 
@@ -33,4 +47,3 @@ def start_logging(level=None):
     log("dtocean_moorings",
         level=level,
         info_message="Begin logging for dtocean_moorings.")
-
