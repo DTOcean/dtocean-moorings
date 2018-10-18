@@ -72,7 +72,9 @@ setup(name='dtocean-moorings',
       install_requires=['numpy',
                         'pandas',
                         'polite>=0.9',
-                        'scipy' ],
+                        'scipy',
+                        'setuptools'
+                        ],
 	   package_data={'dtocean_moorings': ['config/*.yaml']
                     },
       zip_safe=False, # Important for reading config files

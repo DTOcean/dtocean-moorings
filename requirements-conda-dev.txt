@@ -4,6 +4,7 @@
 numpy
 pandas
 scipy
+setuptools
 
 # TEST DEPENDENCIES
 pytest-cov
