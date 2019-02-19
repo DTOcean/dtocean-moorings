@@ -420,7 +420,7 @@ class Loads(object):
                 elif systype == 'tidefloat':
                     self.currentvelhub = (self._variables.currentvel 
                         * ((self.bathysysorig - (self._variables.sysdraft 
-                        + self._variables.hubheight)) / self.bathysysorig) 
+                        - self._variables.hubheight)) / self.bathysysorig) 
                         ** (1.0/7.0))
                     
             elif self._variables.currentprof == "uniform":
@@ -2018,7 +2018,6 @@ class Loads(object):
             
         if self._variables.maxdisp is not None:
             maxdisp = self._variables.maxdisp[:]
-            maxdisp[2] += self._variables.sysdraft
         else:
             # Set very high displacement limits if not specified by the user
             maxdisp = [1000.0, 1000.0, 1000.0]

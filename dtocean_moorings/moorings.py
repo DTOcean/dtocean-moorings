@@ -1198,6 +1198,8 @@ class Moor(Umb, Loads):
                                     lineten[2+wc][j] = lineten[2+wc][j]
                                 linetenind = 2 + wc 
                         
+                        draft_diff = self._variables.sysdraft - sysdraft
+                        
                         # """ If calculated  line tensions are higher than the capacity of 
                         # the components abort run """                        
                         if (l >= 1 and  m > 100 and min(self.moorcomptab['mbl'].tolist()) < self.moorsf 
@@ -1208,7 +1210,7 @@ class Moor(Umb, Loads):
                                 logmsg.append('Maximum line tension (including FoS) = {}'.format(self.moorsf * max(lineten[linetenind])))
                                 logmsg.append('Minimum component MBL = {}'.format(min(self.moorcomptab['mbl'].tolist())))
                                 compexceedflag = 'True'
-                                self.sysposfail = (limitstate, [syspos[0], syspos[1], sysdraft])
+                                self.sysposfail = (limitstate, [syspos[0], syspos[1], draft_diff])
                                 self.initcondfail = [linexf, linezf, Hfline, Vfline]
                                 logmsg.append('System position at failure = {}'.format(self.sysposfail))
                                 logmsg.append('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')    
@@ -1228,7 +1230,7 @@ class Moor(Umb, Loads):
                             # A check is carried out to determine if the device
                             # vertical position exceeds the user-specified 
                             # displacement limits for ULS and ALS tests
-                            if syspos[2] > self.maxdisp[2]:
+                            if abs(syspos[2]) > self.maxdisp[2]:
 
                                 logmsg = [""]
                                 logmsg.append('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
@@ -1239,7 +1241,7 @@ class Moor(Umb, Loads):
                                 self.dispexceedflag = 'True'
                                 self.sysposfail = (limitstate, [syspos[0],
                                                                 syspos[1],
-                                                                sysdraft])
+                                                                draft_diff])
                                 self.initcondfail = [linexf,
                                                      linezf,
                                                      Hfline,
@@ -1255,10 +1257,9 @@ class Moor(Umb, Loads):
                             # For ULS tests, ensure the device does not exceed
                             # the given horizontal displacements
                             if (limitstate == 'ULS' and
-                                (syspos[0] > self.maxdisp[0] or 
-                                 syspos[1] > self.maxdisp[1])):
+                                (abs(syspos[0]) > self.maxdisp[0] or 
+                                 abs(syspos[1]) > self.maxdisp[1])):
                                 
-
                                 logmsg = [""]
                                 logmsg.append('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
                                               '!!!!!!!!!!!!!!!!!')
@@ -1267,7 +1268,7 @@ class Moor(Umb, Loads):
                                 self.dispexceedflag = 'True'
                                 self.sysposfail = (limitstate, [syspos[0],
                                                                 syspos[1],
-                                                                sysdraft])
+                                                                draft_diff])
                                 self.initcondfail = [linexf,
                                                      linezf,
                                                      Hfline,
@@ -1296,7 +1297,7 @@ class Moor(Umb, Loads):
                                 self.dispexceedflag = 'True'
                                 self.sysposfail = (limitstate, [syspos[0],
                                                                 syspos[1],
-                                                                sysdraft])
+                                                                draft_diff])
                                 self.initcondfail = [linexf,
                                                      linezf,
                                                      Hfline,
@@ -1450,7 +1451,7 @@ class Moor(Umb, Loads):
                             if round(HsysloadY - sum(HflineY), 3) < 0.0:
                                 syspos[1] = syspos[1] + hsysdisp * math.cos(
                                     math.fabs(errang))
-                            syspos[2] = sysdraft
+                            syspos[2] = self._variables.sysdraft - sysdraft
 
                         else:
                             Hloadcheck = 'True'                           
@@ -1539,7 +1540,7 @@ class Moor(Umb, Loads):
                                             * math.pi / 180.0) + syspos[1] 
                                             * math.cos(-self._variables.sysorienang * math.pi 
                                             / 180.0)) + self._variables.sysorig[deviceid][1],
-                                            -syspos[2]]
+                                            syspos[2] - self._variables.sysdraft]
                             logmsg = [""]
                             logmsg.append(('Draft equilibrium at {} reached '
                                            'after {} run(s)').format(sysdraft,
@@ -1571,9 +1572,9 @@ class Moor(Umb, Loads):
                                 + syspos[0] - foundloc[j][0]) ** 2.0
                                 + (fairloc[j][1] + syspos[1] 
                                 - foundloc[j][1]) ** 2.0)
-                            linezf[j] = ((fairloc[j][2]  - (sysdraft 
-                                    - self._variables.sysdraft)) 
-                                    - foundloc[j][2]) 
+                                
+                            linezf[j] = fairloc[j][2] - foundloc[j][2] - \
+                                                                    sysdraft
                                     
                         if m == mlim:
                             logmsg = ('Position not converged: [Hloadcheck, '
@@ -1590,7 +1591,7 @@ class Moor(Umb, Loads):
                             # self.linelengbedref = copy.deepcopy(self.linelengbed)  
                     """ Final system positions relative to local device origin """        
                     finalsyspos[l+wc][0:2] = syspos[0:2]
-                    finalsyspos[l+wc][2] = sysdraft
+                    finalsyspos[l+wc][2] = self._variables.sysdraft - sysdraft
                     if l >= 2:
                         logmsg = [""]
                         logmsg.append('_________________________________________________________________________') 
@@ -2289,7 +2290,9 @@ class Moor(Umb, Loads):
                                 """ Approximate catenary profile used in to approximate length of line resting on seafloor at equilibrium """
                                 linexf[j] = math.sqrt((self.fairloc[j][0] - self.foundloc[j][0]) ** 2.0 
                                             + (self.fairloc[j][1] - self.foundloc[j][1]) ** 2.0)                                                
-                                linezf[j] = self.fairloc[j][2] - self.foundloc[j][2]          
+                                linezf[j] = self.fairloc[j][2] - \
+                                                self.foundloc[j][2] - \
+                                                    self._variables.sysdraft
                                 
                                 """ Weight per unit length of chain """
                                 omega = self.moorcomptab.ix['chain','wet mass'] * self._variables.gravity 
