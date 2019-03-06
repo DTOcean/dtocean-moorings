@@ -864,10 +864,12 @@ class Found(Moor, Loads):
                         
             a = np.array([np.array([1.0 for row in range(self.quanfound)]), 
                           self.foundloc[:,1], 
-                          self.foundloc[:,0]])
+                          self.foundloc[:,0]],
+                         dtype='float')
             b = np.array([math.fabs(self.totsysstatloads[2]),
-                          self.sysbasemom[1],self.sysbasemom[0]])
-            self.reactfoundloads = np.linalg.lstsq(a, b)            
+                          self.sysbasemom[1],self.sysbasemom[0]],
+                         dtype='float')
+            self.reactfoundloads = np.linalg.lstsq(a, b)
             """ To keep with convention a negative sign is added to the 
                 foundation reaction loads """
             self.vertfoundloads = []     
