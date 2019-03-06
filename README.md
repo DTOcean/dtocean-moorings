@@ -36,14 +36,14 @@ Conda can be used to install dependencies into a dedicated environment from
 the source code root directory:
 
 ```
-conda create -n _dtocean-moor python=2.7 pip
+conda create -n _dtocean_moor python=2.7 pip
 ```
 
 Activate the environment, then copy the `.condrc` file to store installation  
 channels:
 
 ```
-$ conda activate _dtocean-moor
+$ conda activate _dtocean_moor
 $ copy .condarc %CONDA_PREFIX%
 ```
 
@@ -79,7 +79,7 @@ If not already active, activate the conda environment set up in the [Source
 Code](#source-code) section:
 
 ```
-$ conda activate _dtocean-moor
+$ conda activate _dtocean_moor
 ```
 
 Install packages required for testing to the environment (one time only):
@@ -105,7 +105,7 @@ $ conda remove dtocean-moorings
 To uninstall the source code and its conda environment:
 
 ```
-$ conda remove --name _dtocean-moor --all
+$ conda remove --name _dtocean_moor --all
 ```
 
 ## Usage
