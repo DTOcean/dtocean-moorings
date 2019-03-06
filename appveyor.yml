@@ -40,8 +40,8 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update --quiet conda
   - conda info --all
-  - conda create -n _dtocean-moor python=%PYTHON_VERSION% pip
-  - activate _dtocean-moor
+  - conda create -n _dtocean_moor python=%PYTHON_VERSION% pip
+  - activate _dtocean_moor
   - copy .condarc %CONDA_PREFIX%
   - conda install polite=0.10.0
   - conda install --file requirements-conda-dev.txt
