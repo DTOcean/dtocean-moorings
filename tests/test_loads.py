@@ -176,7 +176,7 @@ def test_get_maximum_displacement(mocker):
     test = Loads(variables)
     result = test._get_maximum_displacement()
     
-    assert np.isclose(result, [0, 0, 10]).all()
+    assert np.isclose(result, [0, 0, 0]).all()
     
 
 def test_get_maximum_displacement_none(mocker):
