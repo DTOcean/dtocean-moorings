@@ -19,7 +19,7 @@ skip_commits:
     - dtocean_moorings/config/
 
 # version format
-version: 1.1.dev0.build{build}
+version: 2.0.0.build{build}
 
 environment:
   matrix:
@@ -39,12 +39,14 @@ install:
   - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
   - conda config --set always_yes yes --set changeps1 no
   - conda update --quiet conda
-  - conda config --append channels conda-forge
-  - conda config --append channels dataonlygreater
   - conda info --all
-  - "conda create --quiet --name conda-env-%PYTHON_VERSION%-%ARCH% python=%PYTHON_VERSION% --file requirements-conda.txt"
-  - activate conda-env-%PYTHON_VERSION%-%ARCH%
-  - python setup.py develop
+  - conda create -n _dtocean-moor python=%PYTHON_VERSION% pip
+  - activate _dtocean-moor
+  - copy .condarc %CONDA_PREFIX%
+  - conda install polite=0.10.0
+  - conda install --file requirements-conda-dev.txt
+  - pip install -e .
+  - conda install pytest pytest-cov pytest-mock
   
 build: off
   

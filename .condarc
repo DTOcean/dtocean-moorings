@@ -1,0 +1,6 @@
+pinned_packages:
+  - python=2
+
+channels:
+  - defaults
+  - dataonlygreater

@@ -19,36 +19,19 @@ def main():
     """ Fairhead dummy scenario with 10x fixed tidal turbines loosely based on the HS1000 
         turbine and 1 substation. Environmental conditions based on the Metocean Assessment of the 
         Fair Head Tidal Energy Project report by DNV GL. Note: ***Denotes information not available. """
-        
-    # Substations parameters
-    substparams = pd.read_csv(os.path.join(data_dir, 'substparams_fairhead.txt'),
-                              sep='\t',
-                              index_col = 0,
-                              header = 0) #substation parameters
-                              
-    # subcog = substparams['subcog']
-    # suborig = substparams['suborig']
-    # substloc = substparams['substloc']
-    
-    # subcog_list = []
-    # suborig_list = []
-    # substloc_list = []
-    
-    # for i in xrange(len(substparams)):
-        
-        # subcog_list.append(subcog .ix[i])
-        # suborig_list.append(suborig.ix[i])
-        # substloc_list.append(substloc.ix[i])
-        
-    # substparams['subcog'] = subcog_list
-    # substparams['suborig'] = suborig_list
-    # substparams['substloc'] = substloc_list
     
     soil_grid = np.genfromtxt(os.path.join(data_dir, 'fairheadsoil.txt'),
                               dtype=(float, float, 'U2', float, 'U2', float),
                               missing_values='INFINITE',
                               filling_values=np.inf)
     soil_grid = soil_grid.tolist()
+    
+    # Substations parameters
+    substparams = pd.read_csv(os.path.join(data_dir,
+                                           'substparams_fairhead.txt'),
+                              sep='\t',
+                              index_col=0,
+                              header=0)
     
     input_variables = Variables(['device001', 'device002', 'device003', 'device004', 'device005', 'device006', 'device007', 'device008', 'device009', 'device010'], #device list
                                 9.80665, #gravity

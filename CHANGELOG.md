@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [2.0.0] - 2019-03-06
 
 ### Added
 
@@ -24,7 +24,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Changed function of prefound argument to define a preferred foundation type
   rather than a single type. If the preferred option can not be found then the
   cheapest alternative is used.
-  
+
+### Removed
+
+- Removed non-working islay and shetland example files and data.
+
 ### Fixed
 
 - Fixed issues with inheritance in Main and Umb classes.
@@ -41,6 +45,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fixed bug with calculation of umbilical top connection point.
 - Fixed bug in device position retuned by the mooreqav method.
 - Fixed ULS and ALS displacement testing logic.
+- Fixed bug with non-float arguments to numpy.linalg.lstsq function.
 
 ## [1.0.0] - 2017-01-05
 
