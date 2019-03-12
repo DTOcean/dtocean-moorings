@@ -1,6 +1,6 @@
 [![appveyor](https://ci.appveyor.com/api/projects/status/github/DTOcean/dtocean-moorings?branch=master&svg=true)](https://ci.appveyor.com/project/DTOcean/dtocean-moorings)
 [![codecov](https://codecov.io/gh/DTOcean/dtocean-moorings/branch/master/graph/badge.svg)](https://codecov.io/gh/DTOcean/dtocean-moorings)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/bb34506cc82f4df883178a6e64619eaf)](https://www.codacy.com/project/H0R5E/dtocean-moorings/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=DTOcean/dtocean-moorings&amp;utm_campaign=Badge_Grade_Dashboard&amp;branchId=8410911)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/db116d8854ac4fbf82ec9878af638a47)](https://www.codacy.com/project/H0R5E/dtocean-moorings/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=DTOcean/dtocean-moorings&amp;utm_campaign=Badge_Grade_Dashboard&amp;branchId=11706073)
 [![release](https://img.shields.io/github/release/DTOcean/dtocean-moorings.svg)](https://github.com/DTOcean/dtocean-moorings/releases/latest)
 
 # DTOcean Mooring and Foundations Module
@@ -36,7 +36,7 @@ Conda can be used to install dependencies into a dedicated environment from
 the source code root directory:
 
 ```
-conda create -n _dtocean_moor python=2.7 pip
+$ conda create -n _dtocean_moor python=2.7 pip
 ```
 
 Activate the environment, then copy the `.condrc` file to store installation  
@@ -113,8 +113,8 @@ $ conda remove --name _dtocean_moor --all
 Example scripts are available in the "examples" folder of the source code.
 
 ```
-cd examples
-python fairhead.py
+$ cd examples
+$ python fairhead.py
 ```
 
 ## Component database keys and values
