@@ -270,9 +270,9 @@ class Variables(object):
         fabcost (float) [-]: optional fabrication cost factor
         maxlines (int, optional) [-]: maximum number of lines per device.
                                       Defaults to 12.
-    
-    Attributes: 
-        None
+        use_max_thrust (bool, optional) [-]:
+            Use the maximum thrust coefficient when calculating tidal turbine
+            loads. Defaults to False.
     
     """
 
@@ -360,8 +360,9 @@ class Variables(object):
                          waveinertiacoefrect,
                          preline,
                          fabcost,
-                         maxlines=None):
-                             
+                         maxlines=None,
+                         use_max_thrust=False):
+        
         self.devices = devices
         self.gravity = gravity
         self.seaden = seaden
@@ -442,10 +443,11 @@ class Variables(object):
         self.groutsf = groutsf
         self.syswetfa = syswetfa
         self.syswetba = syswetba
-        self.sysdraft = sysdraft        
+        self.sysdraft = sysdraft
         self.waveinertiacoefrect = waveinertiacoefrect
         self.preline = preline
         self.fabcost = fabcost
+        self.use_max_thrust = use_max_thrust
         
         # Set default maximum lines to 12
         if maxlines is None:

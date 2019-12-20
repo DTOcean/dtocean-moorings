@@ -374,17 +374,17 @@ class Loads(object):
                                 * sysvol - sysmass)]
                          
     def sysstead(self,systype,
-                     syswidth,
-                     syslength,
-                     sysheight,
-                     sysorienang,
-                     sysprof,
-                     sysdryfa,
-                     sysdryba,
-                     syswetfa,
-                     syswetba,
-                     sysvol,
-                     sysrough):
+                      syswidth,
+                      syslength,
+                      sysheight,
+                      sysorienang,
+                      sysprof,
+                      sysdryfa,
+                      sysdryba,
+                      syswetfa,
+                      syswetba,
+                      sysvol,
+                      sysrough):
         """ Calculate steady system loads """
         if (systype == "tidefixed" and sysheight < self.bathysysorig):
             sysheight = sysheight - self._variables.Clen[0] / 2.0
@@ -424,34 +424,15 @@ class Loads(object):
                         ** (1.0/7.0))
                     
             elif self._variables.currentprof == "uniform":
-                self.currentvelhub = self._variables.currentvel 
-            self.thrustcoefint = interpolate.interp1d(
-                            self._variables.thrustcurv[:,0], 
-                            self._variables.thrustcurv[:,1],
-                            fill_value="extrapolate") 
-            if (self.currentvelhub 
-                >= min(self._variables.thrustcurv[:,0]) 
-                and self.currentvelhub
-                <= max(self._variables.thrustcurv[:,0])):
-                self.thrustcoef = self.thrustcoefint(
-                    self.currentvelhub)
-            elif (self.currentvelhub
-                < min(self._variables.thrustcurv[:,0])):
-                self.thrustcoef = self._variables.thrustcurv[0,1]
-                module_logger.warn('WARNING: Hub velocity out of data range')
-            elif (self.currentvelhub
-                > max(self._variables.thrustcurv[:,0])):
-                self.thrustcoef = self._variables.thrustcurv[-1,1] 
-                module_logger.warn('WARNING: Hub velocity out of data range')
-            self.rotorload = [0.5 * self._variables.seaden * self.rotorsa 
-                * self.thrustcoef 
-                * self.currentvelhub ** 2.0 
-                * math.sin(self.currentangattk 
-                * math.pi / 180.0), 
-                0.5 * self._variables.seaden * self.rotorsa 
-                * self.thrustcoef 
-                * self.currentvelhub ** 2.0 
-                * math.cos(self.currentangattk * math.pi / 180.0), 0.0]
+                self.currentvelhub = self._variables.currentvel
+            
+            self.rotorload = get_rotor_load(self._variables.thrustcurv,
+                                            float(self.currentvelhub),
+                                            self.rotorsa,
+                                            self.currentangattk,
+                                            self._variables.seaden,
+                                            self._variables.use_max_thrust)
+        
         elif systype in ("wavefixed","wavefloat", 'substation'):
             self.rotorload = [0.0, 0.0, 0.0]
             self._variables.hubheight = 0.0
@@ -2300,3 +2281,69 @@ class Loads(object):
             raise ValueError(errStr)
             
         return soilgroup
+
+
+def get_rotor_load(thrustcurv,
+                   currentvelhub,
+                   rotorsa,
+                   currentangattk,
+                   seaden,
+                   use_max_thrust=False):
+    
+    
+    print currentangattk
+    print currentvelhub
+    
+    if use_max_thrust:
+        thrustcoef = max(thrustcurv[:, 1])
+    else:
+        thrustcoef = read_thrust_coefficient(thrustcurv, currentvelhub)
+    
+    log_msg = ('Calculting turbine loads using thrust coefficient: '
+               '{}').format(thrustcoef)
+    module_logger.info(log_msg)
+    
+    part1 = 0.5 * thrustcoef * seaden * rotorsa * currentvelhub ** 2.0
+    deg2rad = math.pi / 180.0
+    
+    rotorload = [part1 * math.sin(currentangattk * deg2rad),
+                 part1 * math.cos(currentangattk * deg2rad),
+                 0.0]
+    
+    log_msg = 'Rotor loads in x: {} and y: {}'.format(rotorload[0],
+                                                      rotorload[1])
+    module_logger.info(log_msg)
+    
+    return rotorload
+
+
+def read_thrust_coefficient(thrustcurv, currentvelhub):
+    
+    min_velocity = min(thrustcurv[:, 0])
+    max_velocity = max(thrustcurv[:, 0])
+    
+    thrustcoefint = interpolate.interp1d(thrustcurv[:, 0],
+                                         thrustcurv[:, 1])
+    
+    if (currentvelhub >= min_velocity and
+        currentvelhub <= max_velocity):
+        
+        thrustcoef = thrustcoefint(currentvelhub)
+    
+    elif currentvelhub < min_velocity:
+        
+        thrustcoef = thrustcurv[0, 1]
+        
+        log_msg = ('Hub velocity below minimum, setting thrust '
+                   'coefficient to value at {} m/s').format(min_velocity)
+        module_logger.warn(log_msg)
+    
+    elif currentvelhub > max_velocity:
+        
+        thrustcoef = thrustcurv[-1, 1]
+        
+        log_msg = ('Hub velocity above maximum, setting thrust  '
+                   'coefficient to value at {} m/s').format(max_velocity)
+        module_logger.warn(log_msg)
+    
+    return thrustcoef
