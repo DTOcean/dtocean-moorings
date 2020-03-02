@@ -2290,10 +2290,6 @@ def get_rotor_load(thrustcurv,
                    seaden,
                    use_max_thrust=False):
     
-    
-    print currentangattk
-    print currentvelhub
-    
     if use_max_thrust:
         thrustcoef = max(thrustcurv[:, 1])
     else:
