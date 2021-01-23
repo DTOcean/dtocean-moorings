@@ -1954,8 +1954,10 @@ class Moor(Umb, Loads):
                         logmsg.append('ULS anchor tensions WC {}'.format(self.anctenuls[-1]))
                         module_logger.info("\n".join(logmsg))
                         
-                        
-                        
+                        # TODO: This logic needs improved to not work on all
+                        # of the components at once. I think the issue is that
+                        # the displacement exceedance is mixed in with this
+                        # when they have different purposes.
                         if (min(self.moorcomptab['mbl'].tolist()) < self.moorsf 
                             * max(max(p) for p in self.linetenuls)
                             or self.dispexceedflag == 'True'):           
@@ -1966,6 +1968,9 @@ class Moor(Umb, Loads):
                                 if self.dispexceedflag == 'False':
                                     """ Initiate search for higher capacity 
                                         component """
+                                    # TODO: Perhaps something more complex here
+                                    # is enougth? Perhaps test the individual 
+                                    # component here.
                                     complim[1] = (self.moorsf * max(max(p) for p 
                                                     in self.linetenuls))
                                 elif self.dispexceedflag == 'True':
