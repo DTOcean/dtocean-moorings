@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 #    Copyright (C) 2016 Sam Weller, Jon Hardwick
-#    Copyright (C) 2017-2018 Mathew Topper
+#    Copyright (C) 2017-2021 Mathew Topper
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -595,7 +595,17 @@ class Main(Found, Subst):
             if self._variables.systype in ("wavefloat","tidefloat"):
                 self.moorsub()
                 self.moorsel()            
-                self.moordes(deviceid)                
+                self.moordes(deviceid)
+                if deviceid == "device001":
+                    self.foundradnew = []
+                    self.gpnearloc(deviceid,
+                                   self._variables.systype,
+                                   self._variables.foundloc,
+                                   self._variables.sysorig[deviceid],
+                                   self._variables.sysorienang)
+                    self.moorsub()
+                    self.moorsel()
+                    self.moordes(deviceid, repeat_first=True)
                 self.moorcost()
                 self.moorinst(deviceid)
                 self.moorbom(deviceid)

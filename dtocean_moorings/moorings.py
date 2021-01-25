@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 #    Copyright (C) 2016 Sam Weller, Jon Hardwick
-#    Copyright (C) 2017-2018 Mathew Topper
+#    Copyright (C) 2017-2021 Mathew Topper
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -40,6 +40,9 @@ from .umbilical import Umb
 
 # Start logging
 module_logger = logging.getLogger(__name__)
+
+# Pandas print all columns
+pd.set_option('max_columns', None)
 
 
 class Moor(Umb, Loads):    
@@ -285,7 +288,7 @@ class Moor(Umb, Loads):
             self.lineangs[j] = ((j * math.pi * 2.0 / self.numlines) 
                                     + (self._variables.sysorienang * math.pi / 180.0))
 
-    def moordes(self, deviceid):       
+    def moordes(self, deviceid, repeat_first=False):       
         super(Moor, self).sysstat(self._variables.sysvol,
                                     self._variables.sysmass)
         super(Moor, self).sysstead(self._variables.systype,
@@ -1865,7 +1868,7 @@ class Moor(Umb, Loads):
                     module_logger.debug('Break K loop')
                     break
                 if k == 0:
-                    if deviceid == 'device001':
+                    if deviceid == 'device001' and not repeat_first:
                         """ Design loop starts with the specification of components for the first device """
                         for l in range(0,len(compblocks)):
                             if l == 0:
@@ -1887,7 +1890,7 @@ class Moor(Umb, Loads):
                                     """ Find matching size components in block list """
                                     selcomplist.append(moorcompret(compblocks[l], 
                                                                    complim))
-                    elif deviceid != 'device001':     
+                    elif deviceid != 'device001' or repeat_first:     
                         """ For all devices apart from the first one, the same mooring configuration 
                         (i.e. components) are used as a starting point """
                         selcomplist = self.moorcomptab['compid'].tolist()
@@ -1958,21 +1961,39 @@ class Moor(Umb, Loads):
                         # of the components at once. I think the issue is that
                         # the displacement exceedance is mixed in with this
                         # when they have different purposes.
-                        if (min(self.moorcomptab['mbl'].tolist()) < self.moorsf 
-                            * max(max(p) for p in self.linetenuls)
-                            or self.dispexceedflag == 'True'):           
-                            maxcompsize = max(self.moorcomptab['size'].tolist())
+                        max_linetenuls = self.moorsf * max(max(p)
+                                                    for p in self.linetenuls)
+                        
+                        if (min(self.moorcomptab['mbl'].tolist()) <
+                                                            max_linetenuls or
+                            self.dispexceedflag == 'True'):
+                                                   
+                            maxcompsize = max(
+                                            self.moorcomptab['size'].tolist())
+                            
                             for blockind in range(0, len(compblocks)): 
-                                colheads = ['compid', 'size', 'length', 'dry mass', 
-                                            'wet mass', 'mbl', 'ea']
+                                
+                                colheads = ['compid',
+                                            'size',
+                                            'length',
+                                            'dry mass', 
+                                            'wet mass',
+                                            'mbl',
+                                            'ea']
+                                
                                 if self.dispexceedflag == 'False':
-                                    """ Initiate search for higher capacity 
-                                        component """
-                                    # TODO: Perhaps something more complex here
-                                    # is enougth? Perhaps test the individual 
-                                    # component here.
-                                    complim[1] = (self.moorsf * max(max(p) for p 
-                                                    in self.linetenuls))
+                                    # Initiate search for higher capacity 
+                                    # component if required
+                                    if (self.moorcomptab.ix[blockind]['mbl'] >
+                                                            max_linetenuls):
+                                        continue
+                                    
+                                    log_msg = "Increasing compid : {}".format(
+                                       self.moorcomptab.ix[blockind]['compid'])
+                                    module_logger.debug(log_msg)
+                                    
+                                    complim[1] = max_linetenuls
+                                    
                                 elif self.dispexceedflag == 'True':
                                     """ Initiate search for larger size component to 
                                         increase stiffness of mooring system """
