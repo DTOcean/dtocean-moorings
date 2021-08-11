@@ -7,17 +7,6 @@
 #      general configuration      #
 #---------------------------------#
 
-# Build only for commits to certain locations
-only_commits:
-  files:
-    - dtocean_moorings/
-    - tests/
-    - setup.py
-    
-skip_commits:
-  files:
-    - dtocean_moorings/config/
-
 # version format
 version: 2.0.0.build{build}
 
@@ -30,7 +19,6 @@ environment:
     - PYTHON_VERSION: 2.7
       MINICONDA: C:\Miniconda-x64
       ARCH: "64"
-
 
 init:
   - "ECHO %PYTHON_VERSION% %MINICONDA%"
@@ -46,7 +34,7 @@ install:
   - conda install polite=0.10.0
   - conda install --file requirements-conda-dev.txt
   - pip install -e .
-  - conda install pytest pytest-cov pytest-mock
+  - conda install mock pytest pytest-cov=2.5.1 pytest-mock openpyxl xlrd xlwt
   
 build: off
   
