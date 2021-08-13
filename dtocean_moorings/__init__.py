@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 #    Copyright (C) 2016 Sam Weller, Jon Hardwick, Mathew Topper
-#    Copyright (C) 2019 Mathew Topper
+#    Copyright (C) 2019-2021 Mathew Topper
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,11 +22,8 @@ from pkg_resources import get_distribution
 from polite.paths import ObjDirectory, UserDataDirectory, DirectoryMap
 from polite.configuration import Logger
 
-# Define build number for packaging test
-from ._build import BUILD
-
 # credentials
-__build__ = BUILD
+__authors__ = ['DTOcean Developers']
 __version__ = get_distribution('dtocean-moorings').version
 
 # Set default logging handler to avoid "No handler found" warnings.

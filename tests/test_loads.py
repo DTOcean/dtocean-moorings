@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#    Copyright (C) 2017-2018 Mathew Topper
+#    Copyright (C) 2017-2021 Mathew Topper
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -20,7 +20,9 @@ import math
 import numpy as np
 import pytest
 
-from dtocean_moorings.loads import Loads
+from dtocean_moorings.loads import (Loads,
+                                    read_thrust_coefficient,
+                                    get_rotor_load)
 
 
 @pytest.fixture
@@ -538,7 +540,7 @@ def test_get_soil_group(mocker, soiltype, expected):
     result = test._get_soil_group(soiltype)
     
     assert result == expected
-    
+
 
 def test_get_soil_group_fail(mocker):
     
@@ -549,3 +551,34 @@ def test_get_soil_group_fail(mocker):
     
     with pytest.raises(ValueError):
         test._get_soil_group("bob")
+
+
+@pytest.mark.parametrize("currentvelhub, expected", [
+        (0.5, 0.5),
+        (-1, 0),
+        (2, 1)])
+def test_read_thrust_coefficient(currentvelhub, expected):
+    
+    thrustcurv = np.array([[0, 0], [1, 1]])
+    test = read_thrust_coefficient(thrustcurv, currentvelhub)
+    
+    assert np.isclose(test, expected)
+
+
+@pytest.mark.parametrize("currentangattk, use_max_thrust, expected", [
+        (0, False, (-1, 0, 0)),
+        (90, False, (0, 1, 0)),
+        (180, False, (1, 0, 0)),
+        (270, False, (0, -1, 0)),
+        (0, True, (-2, 0, 0)),])
+def test_get_rotor_load(currentangattk, use_max_thrust, expected):
+    
+    thrustcurv = np.array([[0, 0], [1, 1]])
+    test = get_rotor_load(thrustcurv,
+                          0.5,
+                          16,
+                          currentangattk,
+                          1,
+                          use_max_thrust)
+    
+    assert np.isclose(test, expected).all()

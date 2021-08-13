@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 #    Copyright (C) 2016 Sam Weller, Jon Hardwick
-#    Copyright (C) 2017-2018 Mathew Topper
+#    Copyright (C) 2017-2021 Mathew Topper
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -270,9 +270,9 @@ class Variables(object):
         fabcost (float) [-]: optional fabrication cost factor
         maxlines (int, optional) [-]: maximum number of lines per device.
                                       Defaults to 12.
-    
-    Attributes: 
-        None
+        use_max_thrust (bool, optional) [-]:
+            Use the maximum thrust coefficient when calculating tidal turbine
+            loads. Defaults to False.
     
     """
 
@@ -360,8 +360,9 @@ class Variables(object):
                          waveinertiacoefrect,
                          preline,
                          fabcost,
-                         maxlines=None):
-                             
+                         maxlines=None,
+                         use_max_thrust=False):
+        
         self.devices = devices
         self.gravity = gravity
         self.seaden = seaden
@@ -442,10 +443,11 @@ class Variables(object):
         self.groutsf = groutsf
         self.syswetfa = syswetfa
         self.syswetba = syswetba
-        self.sysdraft = sysdraft        
+        self.sysdraft = sysdraft
         self.waveinertiacoefrect = waveinertiacoefrect
         self.preline = preline
         self.fabcost = fabcost
+        self.use_max_thrust = use_max_thrust
         
         # Set default maximum lines to 12
         if maxlines is None:
@@ -593,7 +595,17 @@ class Main(Found, Subst):
             if self._variables.systype in ("wavefloat","tidefloat"):
                 self.moorsub()
                 self.moorsel()            
-                self.moordes(deviceid)                
+                self.moordes(deviceid)
+                if deviceid == "device001":
+                    self.foundradnew = []
+                    self.gpnearloc(deviceid,
+                                   self._variables.systype,
+                                   self._variables.foundloc,
+                                   self._variables.sysorig[deviceid],
+                                   self._variables.sysorienang)
+                    self.moorsub()
+                    self.moorsel()
+                    self.moordes(deviceid, repeat_first=True)
                 self.moorcost()
                 self.moorinst(deviceid)
                 self.moorbom(deviceid)
