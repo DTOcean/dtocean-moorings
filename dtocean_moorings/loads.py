@@ -2302,6 +2302,10 @@ def get_rotor_load(thrustcurv,
     part1 = 0.5 * thrustcoef * seaden * rotorsa * currentvelhub ** 2.0
     deg2rad = math.pi / 180.0
     
+    # Rotor is 90 degrees to device orientation
+    currentangattk = currentangattk - 90
+    if currentangattk < 0.0: currentangattk = 360.0 + currentangattk
+    
     rotorload = [part1 * math.sin(currentangattk * deg2rad),
                  part1 * math.cos(currentangattk * deg2rad),
                  0.0]
