@@ -273,6 +273,7 @@ class Loads(object):
         self.maxdisp = None
         self.lineangs = []
         self.bathysysorig = None
+        self.rotorload = None
         
         return
         
@@ -2336,7 +2337,7 @@ def read_thrust_coefficient(thrustcurv, currentvelhub):
         
         log_msg = ('Hub velocity below minimum, setting thrust '
                    'coefficient to value at {} m/s').format(min_velocity)
-        module_logger.warn(log_msg)
+        module_logger.warning(log_msg)
     
     elif currentvelhub > max_velocity:
         
@@ -2344,6 +2345,6 @@ def read_thrust_coefficient(thrustcurv, currentvelhub):
         
         log_msg = ('Hub velocity above maximum, setting thrust  '
                    'coefficient to value at {} m/s').format(max_velocity)
-        module_logger.warn(log_msg)
+        module_logger.warning(log_msg)
     
     return thrustcoef
