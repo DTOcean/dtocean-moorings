@@ -1,6 +1,6 @@
 [![appveyor](https://ci.appveyor.com/api/projects/status/github/DTOcean/dtocean-moorings?branch=master&svg=true)](https://ci.appveyor.com/project/DTOcean/dtocean-moorings)
 [![codecov](https://codecov.io/gh/DTOcean/dtocean-moorings/branch/master/graph/badge.svg)](https://codecov.io/gh/DTOcean/dtocean-moorings)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/db116d8854ac4fbf82ec9878af638a47)](https://www.codacy.com/project/H0R5E/dtocean-moorings/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=DTOcean/dtocean-moorings&amp;utm_campaign=Badge_Grade_Dashboard&amp;branchId=11706073)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/8deb46aea7fd41a9baa9993e9d4279da)](https://www.codacy.com/gh/DTOcean/dtocean-moorings/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=DTOcean/dtocean-moorings&amp;utm_campaign=Badge_Grade)
 [![release](https://img.shields.io/github/release/DTOcean/dtocean-moorings.svg)](https://github.com/DTOcean/dtocean-moorings/releases/latest)
 
 # DTOcean Mooring and Foundations Module
@@ -15,7 +15,7 @@ See [dtocean-app](https://github.com/DTOcean/dtocean-app) or [dtocean-core](
 https://github.com/DTOcean/dtocean-app) to use this package within the DTOcean
 ecosystem.
 
-* For python 2.7 only.
+\* For python 2.7 only.
 
 ## Installation
 
@@ -45,6 +45,13 @@ channels:
 ```
 $ conda activate _dtocean_moor
 $ copy .condarc %CONDA_PREFIX%
+```
+
+OR, if you're using Powershell:
+
+```
+$ conda activate _dtocean_moor
+$ copy .condarc $env:CONDA_PREFIX
 ```
 
 Install [polite](https://github.com/DTOcean/polite) into the environment. For 
@@ -85,13 +92,13 @@ $ conda activate _dtocean_moor
 Install packages required for testing to the environment (one time only):
 
 ```
-$ conda install -y pytest pytest-mock
+$ conda install -y mock pytest pytest-cov=2.5.1 pytest-mock
 ```
 
 Run the tests:
 
 ``` 
-$ py.test tests
+$ pytest tests
 ```
 
 ### Uninstall
@@ -122,25 +129,26 @@ $ python fairhead.py
 The keys of the `compdict` argument to the Variables class have the following
 meanings:
 
-* item1: Mooring or foundation system
-* item2: Name
-* item3: Subname
-* item4: [Material, Grade, Colour]
-* item5: Strength and mechanical properties. For piles [yield stress, Young's 
-         modulus]. For ropes [minimum break load, [load, axial stiffness]]. For 
-         cables [minimum break load, minimum bend radius]. All other 
-         components: [minimum break load, axial stiffness]
-* item6: Size. For piles/suction caissons [diameter, thickness]. For anchors 
-         [width, depth, height, connecting size]. For chains, forerunner  
-         assemblies, shackles and swivels [diameter, connecting length]. For 
-         ropes and cables [outer diameter]
-* item7: Mass. For piles/suction caissons, chains, ropes, cables and forerunner 
-         assemblies [dry mass per unit length, wet mass per unit length]. For 
-         anchors, shackles and swivels [dry unit mass, wet unit mass]
-* item8: Environmental impact
-* item9: Anchor coefficients
-* item10: Failure rates
-* item11: Cost
+*   item1: Mooring or foundation system
+*   item2: Name
+*   item3: Subname
+*   item4: [Material, Grade, Colour]
+*   item5: Strength and mechanical properties. For piles [yield stress, Young's 
+           modulus]. For ropes [minimum break load, [load, axial stiffness]]. 
+           For cables [minimum break load, minimum bend radius]. All other 
+           components: [minimum break load, axial stiffness]
+*   item6: Size. For piles/suction caissons [diameter, thickness]. For anchors 
+           [width, depth, height, connecting size]. For chains, forerunner  
+           assemblies, shackles and swivels [diameter, connecting length]. For 
+           ropes and cables [outer diameter]
+*   item7: Mass. For piles/suction caissons, chains, ropes, cables and 
+           forerunner  assemblies [dry mass per unit length, wet mass per unit 
+           length]. For anchors, shackles and swivels [dry unit mass, wet unit 
+           mass]
+*   item8: Environmental impact
+*   item9: Anchor coefficients
+*   item10: Failure rates
+*   item11: Cost
 
 ## Contributing
 
@@ -158,9 +166,9 @@ Please make sure to update tests as appropriate.
 This package was initially created as part of the [EU DTOcean project](
 https://www.dtoceanplus.eu/About-DTOceanPlus/History) by:
 
- * Sam Weller at [the University of Exeter](https://www.exeter.ac.uk/)
- * Jon Hardwick at [the University of Exeter](https://www.exeter.ac.uk/)
- * Mathew Topper at [TECNALIA](https://www.tecnalia.com)
+*   Sam Weller at [the University of Exeter](https://www.exeter.ac.uk/)
+*   Jon Hardwick at [the University of Exeter](https://www.exeter.ac.uk/)
+*   Mathew Topper at [TECNALIA](https://www.tecnalia.com)
 
 It is now maintained by Mathew Topper at [Data Only Greater](
 https://www.dataonlygreater.com/).

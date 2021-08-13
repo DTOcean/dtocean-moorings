@@ -34,7 +34,7 @@ install:
   - conda install polite=0.10.0
   - conda install --file requirements-conda-dev.txt
   - pip install -e .
-  - conda install mock pytest pytest-cov=2.5.1 pytest-mock openpyxl xlrd xlwt
+  - conda install mock pytest pytest-cov=2.5.1 pytest-mock
   
 build: off
   
