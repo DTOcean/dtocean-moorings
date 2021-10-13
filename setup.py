@@ -102,7 +102,9 @@ setup(name='dtocean-moorings',
       package_data={'dtocean_moorings': ['config/*.yaml']
                     },
       zip_safe=False, # Important for reading config files
-      tests_require=['pytest'],
+      tests_require=['mock',
+                     'pytest',
+                     'pytest-mock'],
       cmdclass = {'test': PyTest,
                   'cleanpyc': CleanPyc,
                   }
