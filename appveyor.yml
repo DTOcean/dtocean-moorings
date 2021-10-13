@@ -8,7 +8,7 @@
 #---------------------------------#
 
 # version format
-version: 2.1.dev1.build{build}
+version: 2.1.0.build{build}
 
 environment:
   matrix:
@@ -35,13 +35,12 @@ install:
   - conda install --file requirements-conda-dev.txt
   - pip install -e .
   - conda install mock pytest pytest-cov=2.5.1 pytest-mock
-  
+
 build: off
-  
+
 test_script:
   - py.test --cov dtocean_moorings tests
-  
+
 after_test:
  - pip install codecov
  - codecov
-  
